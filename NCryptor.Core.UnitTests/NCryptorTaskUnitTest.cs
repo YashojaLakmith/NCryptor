@@ -8,11 +8,10 @@ namespace NCryptor.Core.UnitTests
     {
         private readonly Mock<ICryptoService> _cryptoSrvStub = new();
         private readonly Mock<IStreamProvider> _streamProviderStub = new();
-        private readonly Mock<IKeyMaterial> _keyMaterialStub = new();
         private readonly Mock<ILogger> _loggerStub = new();
 
         [Fact]
-        public async Task EncryptAsync_WithSuccessfullCompletion_ReturnsCompletedTask()
+        public async Task HandleEncryptAsync_InvokesEncryptAsync()
         {
             _cryptoSrvStub.Setup(stub => stub.EncryptAsync(It.IsAny<CancellationToken>()))
                                 .Returns(Task.CompletedTask)
@@ -25,7 +24,7 @@ namespace NCryptor.Core.UnitTests
         }
 
         [Fact]
-        public async Task DecryptAsync_WithSuccessfullCompletion_ReturnsCompletedTask()
+        public async Task HandleDecryptAsync_InvokesDecryptAsync()
         {
             _cryptoSrvStub.Setup(stub => stub.DecryptAsync(It.IsAny<CancellationToken>()))
                                 .Returns(Task.CompletedTask)
@@ -38,7 +37,7 @@ namespace NCryptor.Core.UnitTests
         }
 
         [Fact]
-        public async Task EncryptAsync_OnCancellation_ThrowsOpCancelledException()
+        public async Task HandleEncryptAsync_CatchesOperationCancelledException_Rethrows()
         {
             _cryptoSrvStub.Setup(stub => stub.EncryptAsync(It.IsAny<CancellationToken>()))
                                 .Throws(new OperationCanceledException());
@@ -50,7 +49,7 @@ namespace NCryptor.Core.UnitTests
         }
 
         [Fact]
-        public async Task DecryptAsync_OnCancellation_ThrowsOpCancelledException()
+        public async Task HandleDecryptAsync_CatchesOperationCancelledException_Rethrows()
         {
             _cryptoSrvStub.Setup(stub => stub.DecryptAsync(It.IsAny<CancellationToken>()))
                                 .Throws(new OperationCanceledException());
@@ -61,9 +60,41 @@ namespace NCryptor.Core.UnitTests
             await act.Should().ThrowAsync<OperationCanceledException>();
         }
 
+        [Fact]
+        public async Task HandleEncryptAsync_CatchesOperationCancelledException_InvokesLogWithCancellationMessage()
+        {
+            _cryptoSrvStub.Setup(stub => stub.EncryptAsync(It.IsAny<CancellationToken>()))
+                                .Throws(new OperationCanceledException());
+
+            _loggerStub.Setup(stub => stub.Log(It.IsAny<string>()))
+                                .Verifiable();
+
+            var obj = CreateNewNCryptorTask();
+
+            await obj.HandleEncryptAsync();
+
+            _loggerStub.Verify();           
+        }
+
+        [Fact]
+        public async Task HandleDecryptAsync_CatchesOperationCancelledException_InvokesLogWithCancellationMessage()
+        {
+            _cryptoSrvStub.Setup(stub => stub.DecryptAsync(It.IsAny<CancellationToken>()))
+                                .Throws(new OperationCanceledException());
+
+            _loggerStub.Setup(stub => stub.Log(It.IsAny<string>()))
+                                .Verifiable();
+
+            var obj = CreateNewNCryptorTask();
+
+            await obj.HandleDecryptAsync();
+
+            _loggerStub.Verify();
+        }
+
         private NCryptorTask CreateNewNCryptorTask()
         {
-            return new NCryptorTask(_cryptoSrvStub.Object, _keyMaterialStub.Object, _loggerStub.Object, _streamProviderStub.Object);
+            return new NCryptorTask(_cryptoSrvStub.Object, _loggerStub.Object, _streamProviderStub.Object);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NCryptor.Core
+namespace SymmetricAlgorithms
 {
     public interface IKeyMaterial : IDisposable
     {

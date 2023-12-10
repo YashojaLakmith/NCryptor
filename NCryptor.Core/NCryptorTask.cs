@@ -8,16 +8,14 @@ namespace NCryptor.Core
     public class NCryptorTask : IDisposable
     {
         private readonly ICryptoService _cryptoService;
-        private readonly IKeyMaterial _keyMaterial;
         private readonly ILogger _logger;
         private readonly IStreamProvider _streamProvider;
         private readonly CancellationToken _cancellationToken;
         private bool disposedValue;
 
-        public NCryptorTask(ICryptoService cryptoService, IKeyMaterial keyMaterial, ILogger logger, IStreamProvider streamProvider, CancellationToken cancellationToken = default)
+        public NCryptorTask(ICryptoService cryptoService, ILogger logger, IStreamProvider streamProvider, CancellationToken cancellationToken = default)
         {
             _cryptoService = cryptoService;
-            _keyMaterial = keyMaterial;
             _logger = logger;
             _streamProvider = streamProvider;
             _cancellationToken = cancellationToken;

@@ -3,11 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCryptor.Core", "NCryptor.Core\NCryptor.Core.csproj", "{26E9F4D9-C0F8-4A87-9930-DE3C2058D142}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NCryptor.Core", "NCryptor.Core\NCryptor.Core.csproj", "{26E9F4D9-C0F8-4A87-9930-DE3C2058D142}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{756DE46A-BCBE-4995-BA12-CCBD8BD4BD14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NCryptor.Core.UnitTests", "NCryptor.Core.UnitTests\NCryptor.Core.UnitTests.csproj", "{412341CB-7C87-48F5-B2A2-A50686A69542}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NCryptor.Core.UnitTests", "NCryptor.Core.UnitTests\NCryptor.Core.UnitTests.csproj", "{412341CB-7C87-48F5-B2A2-A50686A69542}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SymmetricAlgorithms", "SymmetricAlgorithms\SymmetricAlgorithms.csproj", "{5B97DF87-1582-4C0C-B2D0-F330A88E7406}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SymmetricAlgorithms_UnitTests", "SymmetricAlgorithms_UnitTests\SymmetricAlgorithms_UnitTests.csproj", "{13010000-0B03-419E-A5DC-B7EED917F682}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,12 +27,21 @@ Global
 		{412341CB-7C87-48F5-B2A2-A50686A69542}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{412341CB-7C87-48F5-B2A2-A50686A69542}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{412341CB-7C87-48F5-B2A2-A50686A69542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B97DF87-1582-4C0C-B2D0-F330A88E7406}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B97DF87-1582-4C0C-B2D0-F330A88E7406}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B97DF87-1582-4C0C-B2D0-F330A88E7406}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B97DF87-1582-4C0C-B2D0-F330A88E7406}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13010000-0B03-419E-A5DC-B7EED917F682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13010000-0B03-419E-A5DC-B7EED917F682}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13010000-0B03-419E-A5DC-B7EED917F682}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13010000-0B03-419E-A5DC-B7EED917F682}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{412341CB-7C87-48F5-B2A2-A50686A69542} = {756DE46A-BCBE-4995-BA12-CCBD8BD4BD14}
+		{13010000-0B03-419E-A5DC-B7EED917F682} = {756DE46A-BCBE-4995-BA12-CCBD8BD4BD14}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF6B9962-1BF3-46B5-A812-5F11614B8750}
