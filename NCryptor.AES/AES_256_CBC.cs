@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using NCryptor.Core;
 
-namespace SymmetricAlgorithms
+namespace AES
 {
     public class AES_256_CBC : ICryptoService
     {
@@ -13,7 +13,9 @@ namespace SymmetricAlgorithms
         private readonly IStreamProvider _streams;
         private readonly Aes _aesAlg;
 
-        public AES_256_CBC(IStreamProvider streams, IKeyMaterial keyMaterial)
+        /// <exception cref="ArgumentNullException"> is thrown when the <see cref="IKeyMaterial.Key"/> or <see cref="IKeyMaterial.IV"/> or <see cref="IStreamProvider.InputStream"/> or <see cref="IStreamProvider.OutputStream"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"> is thrown when <see cref="IKeyMaterial.Key"/> or <see cref="IKeyMaterial.IV"/> lengths are invalid.</exception>
+        public AES_256_CBC(IStreamProvider streams, AESKeyMaterial keyMaterial)
         {
             VerifyKeyandIV(keyMaterial.Key, keyMaterial.IV);
 
@@ -28,10 +30,10 @@ namespace SymmetricAlgorithms
         public async Task DecryptAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
-            using(ICryptoTransform decryptor = _aesAlg.CreateDecryptor())
+
+            using (ICryptoTransform decryptor = _aesAlg.CreateDecryptor())
             {
-                using(var cs = new CryptoStream(_streams.OutputStream, decryptor, CryptoStreamMode.Write))
+                using (var cs = new CryptoStream(_streams.OutputStream, decryptor, CryptoStreamMode.Write))
                 {
                     await _streams.InputStream.CopyToAsync(cs, 81920, cancellationToken);
                     cs.FlushFinalBlock();
@@ -43,7 +45,7 @@ namespace SymmetricAlgorithms
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using(ICryptoTransform encryptor =  _aesAlg.CreateEncryptor())
+            using (ICryptoTransform encryptor = _aesAlg.CreateEncryptor())
             {
                 using (var cs = new CryptoStream(_streams.OutputStream, encryptor, CryptoStreamMode.Write))
                 {
@@ -55,22 +57,22 @@ namespace SymmetricAlgorithms
 
         private void VerifyKeyandIV(byte[] key, byte[] iv)
         {
-            if(key is null)
+            if (key is null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
 
-            if(iv is null)
+            if (iv is null)
             {
                 throw new ArgumentNullException(nameof(iv));
             }
 
-            if(key.Length != 32)
+            if (key.Length != 32)
             {
                 throw new ArgumentOutOfRangeException(nameof(key));
             }
 
-            if(iv.Length != 16)
+            if (iv.Length != 16)
             {
                 throw new ArgumentOutOfRangeException(nameof(iv));
             }

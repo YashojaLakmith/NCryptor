@@ -1,4 +1,4 @@
-namespace SymmetricAlgorithms_UnitTests
+namespace NCryptor.AES.UnitTests
 {
     public class UnitTest1
     {

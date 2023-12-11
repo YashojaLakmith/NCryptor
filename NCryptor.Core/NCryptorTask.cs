@@ -21,54 +21,16 @@ namespace NCryptor.Core
             _cancellationToken = cancellationToken;
         }
 
-        public virtual async Task HandleEncryptAsync()
+        /// <exception cref="OperationCanceledException"> is thrown when cancellation is triggered by <see cref="CancellationToken"/>.</exception>
+        /// <exception cref="ObjectDisposedException"> is thrown when an object used in encryption operation has already been disposed.</exception>
+        public Task HandleEncryptAsync()
         {
-            //try
-            //{
-            //    await _cryptoService.EncryptAsync(_cancellationToken);
-            //}
-            //catch (OperationCanceledException ex)
-            //{
-            //    _logger.Log(ex);
-            //    throw;
-            //}
-            //catch(ArgumentNullException ex)
-            //{
-            //    _logger.Log(ex);
-            //}
-            //catch(CryptographicException ex)
-            //{
-            //    _logger.Log(ex);
-            //}
-            //catch(Exception ex)
-            //{
-            //    _logger.Log(ex);
-            //}
+            throw new NotImplementedException();
         }
 
-        public virtual async Task HandleDecryptAsync()
+        public Task HandleDecryptAsync()
         {
-            //try
-            //{
-            //    await _cryptoService.DecryptAsync(_cancellationToken);
-            //}
-            //catch(OperationCanceledException ex)
-            //{
-            //    _logger.Log(ex);
-            //    throw;
-            //}
-            //catch (ArgumentNullException ex)
-            //{
-            //    _logger.Log(ex);
-            //}
-            //catch (CryptographicException ex)
-            //{
-            //    _logger.Log(ex);
-            //}
-            //catch(Exception ex)
-            //{
-            //    _logger.Log(ex);
-            //}
+            throw new NotImplementedException();
         }
 
         protected virtual void Dispose(bool disposing)
@@ -79,7 +41,6 @@ namespace NCryptor.Core
                 {
                     // TODO: dispose managed state (managed objects)
                     _cryptoService.Dispose();
-                    _keyMaterial.Dispose();
                     _streamProvider.Dispose();
                 }
 
