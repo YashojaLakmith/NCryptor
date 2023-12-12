@@ -17,42 +17,24 @@ namespace AES
         /// <exception cref="ArgumentOutOfRangeException"> is thrown when <see cref="IKeyMaterial.Key"/> or <see cref="IKeyMaterial.IV"/> lengths are invalid.</exception>
         public AES_256_CBC(IStreamProvider streams, AESKeyMaterial keyMaterial)
         {
-            VerifyKeyandIV(keyMaterial.Key, keyMaterial.IV);
+            //VerifyKeyandIV(keyMaterial.Key, keyMaterial.IV);
 
-            _streams = streams;
-            _aesAlg = Aes.Create();
-            _aesAlg.IV = keyMaterial.IV;
-            _aesAlg.Key = keyMaterial.Key;
-            _aesAlg.KeySize = 32;
-            _aesAlg.Mode = CipherMode.CBC;
+            //_streams = streams;
+            //_aesAlg = Aes.Create();
+            //_aesAlg.IV = keyMaterial.IV;
+            //_aesAlg.Key = keyMaterial.Key;
+            //_aesAlg.KeySize = 32;
+            //_aesAlg.Mode = CipherMode.CBC;
         }
 
-        public async Task DecryptAsync(CancellationToken cancellationToken = default)
+        public Task DecryptAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            using (ICryptoTransform decryptor = _aesAlg.CreateDecryptor())
-            {
-                using (var cs = new CryptoStream(_streams.OutputStream, decryptor, CryptoStreamMode.Write))
-                {
-                    await _streams.InputStream.CopyToAsync(cs, 81920, cancellationToken);
-                    cs.FlushFinalBlock();
-                }
-            }
+            throw new NotImplementedException();
         }
 
-        public async Task EncryptAsync(CancellationToken cancellationToken = default)
+        public Task EncryptAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            using (ICryptoTransform encryptor = _aesAlg.CreateEncryptor())
-            {
-                using (var cs = new CryptoStream(_streams.OutputStream, encryptor, CryptoStreamMode.Write))
-                {
-                    await _streams.InputStream.CopyToAsync(cs, 81920, cancellationToken);
-                    cs.FlushFinalBlock();
-                }
-            }
+            throw new NotImplementedException();
         }
 
         private void VerifyKeyandIV(byte[] key, byte[] iv)
@@ -95,11 +77,11 @@ namespace AES
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        ~AES_256_CBC()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-        }
+        //~AES_256_CBC()
+        //{
+        //    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //    Dispose(disposing: false);
+        //}
 
         public void Dispose()
         {
