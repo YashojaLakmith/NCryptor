@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using AES;
 
 using FluentAssertions;
-using FluentAssertions.Equivalency;
 
 using Moq;
 
@@ -14,14 +13,18 @@ namespace NCryptor.AES.UnitTests
     public class AES_256_CBCTests
     {
         private Mock<IStreamProvider> _streamStub = new();
-        private Mock<AESKeyMaterial> _keyMaterialStub = new();
+        private Mock<IAESKeyMaterial> _keyMaterialStub = new();
 
         [Fact]
         public void Ctor_OnNullKey_ThrowsArgumentNullException()
         {
-            var keyMaterial = new AESKeyMaterial(null, It.IsAny<byte[]>());
+            _keyMaterialStub.Reset();
 
-            var act = () => new AES_256_CBC(_streamStub.Object, keyMaterial);
+            byte[] key = null;
+            _keyMaterialStub.SetupGet(x => x.Key).Returns(key);
+            _keyMaterialStub.SetupGet(x => x.IV).Returns(GenRandomBytes(16));
+
+            var act = () => CreateObject();
 
             act.Should()
                     .Throw<ArgumentNullException>();
@@ -30,9 +33,13 @@ namespace NCryptor.AES.UnitTests
         [Fact]
         public void Ctor_OnNullIV_ThrowsArgumentNullException()
         {
-            var keyMaterial = new AESKeyMaterial(It.IsAny<byte[]>(), null);
+            _keyMaterialStub.Reset();
 
-            var act = () => new AES_256_CBC(_streamStub.Object, keyMaterial);
+            byte[] iv = null;
+            _keyMaterialStub.SetupGet(x => x.Key).Returns(GenRandomBytes(32));
+            _keyMaterialStub.SetupGet(x => x.IV).Returns(iv);
+
+            var act = () => CreateObject();
 
             act.Should()
                     .Throw<ArgumentNullException>();
@@ -41,9 +48,12 @@ namespace NCryptor.AES.UnitTests
         [Fact]
         public void Ctor_OnKeyLengthLessThan32Bytes_ThrowsArgumentOutOfRangeException()
         {
-            var keyMaterial = new AESKeyMaterial(GenRandomBytes(30), It.IsAny<byte[]>());
+            _keyMaterialStub.Reset();
 
-            var act = () => new AES_256_CBC(_streamStub.Object, keyMaterial);
+            _keyMaterialStub.SetupGet(x => x.Key).Returns(GenRandomBytes(31));
+            _keyMaterialStub.SetupGet(x => x.IV).Returns(GenRandomBytes(16));
+
+            var act = () => CreateObject();
 
             act.Should()
                     .Throw<ArgumentOutOfRangeException>();
@@ -52,9 +62,12 @@ namespace NCryptor.AES.UnitTests
         [Fact]
         public void Ctor_OnIVLengthLessThan16Bytes_ThrowsArgumentOutOfRangeException()
         {
-            var keyMaterial = new AESKeyMaterial(It.IsAny<byte[]>(), GenRandomBytes(10));
+            _keyMaterialStub.Reset();
 
-            var act = () => new AES_256_CBC(_streamStub.Object, keyMaterial);
+            _keyMaterialStub.SetupGet(x => x.Key).Returns(GenRandomBytes(32));
+            _keyMaterialStub.SetupGet(x => x.IV).Returns(GenRandomBytes(15));
+
+            var act = () => CreateObject();
 
             act.Should()
                     .Throw<ArgumentOutOfRangeException>();
@@ -63,9 +76,12 @@ namespace NCryptor.AES.UnitTests
         [Fact]
         public void Ctor_OnKeyLengthHigherThan32Bytes_ThrowsArgumentOutOfRangeException()
         {
-            var keyMaterial = new AESKeyMaterial(GenRandomBytes(40), It.IsAny<byte[]>());
+            _keyMaterialStub.Reset();
 
-            var act = () => new AES_256_CBC(_streamStub.Object, keyMaterial);
+            _keyMaterialStub.SetupGet(x => x.Key).Returns(GenRandomBytes(33));
+            _keyMaterialStub.SetupGet(x => x.IV).Returns(GenRandomBytes(16));
+
+            var act = () => CreateObject();
 
             act.Should()
                     .Throw<ArgumentOutOfRangeException>();
@@ -74,9 +90,12 @@ namespace NCryptor.AES.UnitTests
         [Fact]
         public void Ctor_OnIVLengthHigherThan16Bytes_ThrowsArgumentOutOfRangeException()
         {
-            var keyMaterial = new AESKeyMaterial(It.IsAny<byte[]>(), GenRandomBytes(20));
+            _keyMaterialStub.Reset();
 
-            var act = () => new AES_256_CBC(_streamStub.Object, keyMaterial);
+            _keyMaterialStub.SetupGet(x => x.Key).Returns(GenRandomBytes(32));
+            _keyMaterialStub.SetupGet(x => x.IV).Returns(GenRandomBytes(17));
+
+            var act = () => CreateObject();
 
             act.Should()
                     .Throw<ArgumentOutOfRangeException>();
@@ -85,9 +104,12 @@ namespace NCryptor.AES.UnitTests
         [Fact]
         public async Task EncryptAsync_OnCancellationTrigger_ThrowsOperationCancelledException()
         {
+            _keyMaterialStub.Reset();
+            SetupValidKeyAndIv();
             var obj = CreateObject();
-            var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(2000));
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
 
+            await Task.Delay(200);
             var act = () => obj.EncryptAsync(tokenSource.Token);
 
             await act.Should()
@@ -97,9 +119,12 @@ namespace NCryptor.AES.UnitTests
         [Fact]
         public async Task DecryptAsync_OnCancellationTrigger_ThrowsOperationCancelledException()
         {
+            _keyMaterialStub.Reset();
+            SetupValidKeyAndIv();
             var obj = CreateObject();
-            var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(2000));
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
 
+            await Task.Delay(200);
             var act = () => obj.DecryptAsync(tokenSource.Token);
 
             await act.Should()
@@ -109,68 +134,85 @@ namespace NCryptor.AES.UnitTests
         [Fact]
         public async Task EncryptAsync_OnCompletion_OutStreamContainsCiphertext()
         {
-            // mode=aes-256-cbc
-            // key=603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4
-            // iv = 000102030405060708090A0B0C0D0E0F
-            // plain = 6bc1bee22e409f96e93d7e117393172a
-            // cipher = f58c4c04d6e5f1ba779eabfb5f7bfbd6
+            // AES-256-CBC
+            // Padding: PKCS7
+            // Key: C29C1E86767BA2310C4D74D6EAF17173951F6BC8802DCF96E1302D2669A5A7DF
+            // IV: 244E1CE79FBA449407FBA75C47556DDD
+            // Plain: AA18B7EF6802D8150F4447A7C641B2CF
+            // Cipher: 2A748F7F5EE4EBFF81087B8EF6C43BACCAFA18862005C623ADDBFC3405EF9384
 
-            var byteKey = Convert.FromHexString("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
-            var byteIv = Convert.FromHexString("000102030405060708090A0B0C0D0E0F");
-            var plainBytes = Convert.FromHexString("6bc1bee22e409f96e93d7e117393172a");
-            var cipherBytes = Convert.FromHexString("f58c4c04d6e5f1ba779eabfb5f7bfbd6");
+            _keyMaterialStub.Reset();
+            _streamStub.Reset();
 
-            _streamStub.SetupGet(x => x.InputStream).Returns(new MemoryStream(plainBytes));
-            _streamStub.SetupGet(x => x.OutputStream).Returns(new MemoryStream());
+            var key = Convert.FromHexString("C29C1E86767BA2310C4D74D6EAF17173951F6BC8802DCF96E1302D2669A5A7DF");
+            var iv = Convert.FromHexString("244E1CE79FBA449407FBA75C47556DDD");
+            var plainBytes = Convert.FromHexString("AA18B7EF6802D8150F4447A7C641B2CF");
+            var cipherBytes = Convert.FromHexString("2A748F7F5EE4EBFF81087B8EF6C43BACCAFA18862005C623ADDBFC3405EF9384");
 
-            _keyMaterialStub.SetupGet(x => x.Key).Returns(byteKey);
-            _keyMaterialStub.SetupGet(x => x.IV).Returns(byteIv);
+            _keyMaterialStub.SetupGet(x => x.Key).Returns(key);
+            _keyMaterialStub.SetupGet(x => x.IV).Returns(iv);
 
-            var obj = CreateObject();
+            byte[] outStreamBytes;
 
+            using var inStream = new MemoryStream(plainBytes);
+            using var outStream = new MemoryStream();
+            inStream.Position = 0;
+            _streamStub.SetupGet(x => x.InputStream).Returns(inStream);
+            _streamStub.SetupGet(x => x.OutputStream).Returns(outStream);
+
+            using var obj = CreateObject();
             await obj.EncryptAsync();
 
-            var outStreamBytes = new byte[_streamStub.Object.OutputStream.Length];
-            await _streamStub.Object.OutputStream.ReadAsync(outStreamBytes, 0, outStreamBytes.Length);
-
+            outStreamBytes = outStream.ToArray();
             outStreamBytes.Should()
-                            .BeEquivalentTo(plainBytes, o => o.ComparingByValue<byte>()
-                                                                .WithStrictOrdering());
+                            .BeEquivalentTo(cipherBytes);
         }
 
         [Fact]
         public async Task DecryptAsync_OnCompletion_OutStreamContainsPlaintext()
         {
-            // mode = aes - 256 -cbc
-            // key = 603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4
-            // iv = F58C4C04D6E5F1BA779EABFB5F7BFBD6
-            // plain = ae2d8a571e03ac9c9eb76fac45af8e51
-            // cipher = 9cfc4e967edb808d679f777bc6702c7d
+            // AES-256-CBC
+            // Key: C29C1E86767BA2310C4D74D6EAF17173951F6BC8802DCF96E1302D2669A5A7DF
+            // IV: 244E1CE79FBA449407FBA75C47556DDD
+            // Plain: AA18B7EF6802D8150F4447A7C641B2CF
+            // Cipher: 2A748F7F5EE4EBFF81087B8EF6C43BACCAFA18862005C623ADDBFC3405EF9384
 
-            var byteKey = Convert.FromHexString("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
-            var byteIv = Convert.FromHexString("F58C4C04D6E5F1BA779EABFB5F7BFBD6");
-            var plainBytes = Convert.FromHexString("ae2d8a571e03ac9c9eb76fac45af8e51");
-            var cipherBytes = Convert.FromHexString("9cfc4e967edb808d679f777bc6702c7d");
+            _keyMaterialStub.Reset();
+            _streamStub.Reset();
 
-            _streamStub.SetupGet(x => x.InputStream).Returns(new MemoryStream(cipherBytes));
-            _streamStub.SetupGet(x => x.OutputStream).Returns(new MemoryStream());
+            var key = Convert.FromHexString("C29C1E86767BA2310C4D74D6EAF17173951F6BC8802DCF96E1302D2669A5A7DF");
+            var iv = Convert.FromHexString("244E1CE79FBA449407FBA75C47556DDD");
+            var plainBytes = Convert.FromHexString("AA18B7EF6802D8150F4447A7C641B2CF");
+            var cipherBytes = Convert.FromHexString("2A748F7F5EE4EBFF81087B8EF6C43BACCAFA18862005C623ADDBFC3405EF9384");
+            byte[] outStreamBytes;
 
-            _keyMaterialStub.SetupGet(x => x.Key).Returns(byteKey);
-            _keyMaterialStub.SetupGet(x => x.IV).Returns(byteIv);
+            using var input = new MemoryStream(cipherBytes);
+            using var outStream = new MemoryStream();
+            input.Position = 0;
+            _streamStub.SetupGet(x => x.InputStream).Returns(input);
+            _streamStub.SetupGet(x => x.OutputStream).Returns(outStream);
 
-            var obj = CreateObject();
+            _keyMaterialStub.SetupGet(x => x.Key).Returns(key);
+            _keyMaterialStub.SetupGet(x => x.IV).Returns(iv);
+
+            using var obj = new AES_256_CBC(_streamStub.Object, _keyMaterialStub.Object);
             await obj.DecryptAsync();
 
-            var outStreamBytes = new byte[_streamStub.Object.OutputStream.Length];
-            await _streamStub.Object.OutputStream.ReadAsync(outStreamBytes, 0, outStreamBytes.Length);
+            outStreamBytes = outStream.ToArray();
             outStreamBytes.Should()
-                                .BeEquivalentTo(cipherBytes, o => o.ComparingByValue<byte>()
-                                                                        .WithStrictOrdering());
+                                .BeEquivalentTo(plainBytes);
         }
 
         [Fact]
         public async void UsingAfterDisposing_ShouldThrowObjectDisposedException()
         {
+            _keyMaterialStub.Reset();
+            _streamStub.Reset();
+            SetupValidKeyAndIv();
+
+            _streamStub.SetupGet(x => x.InputStream).Returns(new MemoryStream());
+            _streamStub.SetupGet(x => x.OutputStream).Returns(new MemoryStream());
+
             var obj = CreateObject();
             obj.Dispose();
 
@@ -183,6 +225,12 @@ namespace NCryptor.AES.UnitTests
         private AES_256_CBC CreateObject()
         {
             return new AES_256_CBC(_streamStub.Object, _keyMaterialStub.Object);
+        }
+
+        private void SetupValidKeyAndIv()
+        {
+            _keyMaterialStub.SetupGet(x => x.Key).Returns(GenRandomBytes(32));
+            _keyMaterialStub.SetupGet(x => x.IV).Returns(GenRandomBytes(16));
         }
 
         private static byte[] GenRandomBytes(int length)

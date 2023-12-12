@@ -15,26 +15,53 @@ namespace AES
 
         /// <exception cref="ArgumentNullException"> is thrown when the <see cref="IKeyMaterial.Key"/> or <see cref="IKeyMaterial.IV"/> or <see cref="IStreamProvider.InputStream"/> or <see cref="IStreamProvider.OutputStream"/> is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException"> is thrown when <see cref="IKeyMaterial.Key"/> or <see cref="IKeyMaterial.IV"/> lengths are invalid.</exception>
-        public AES_256_CBC(IStreamProvider streams, AESKeyMaterial keyMaterial)
+        public AES_256_CBC(IStreamProvider streams, IAESKeyMaterial keyMaterial)
         {
-            //VerifyKeyandIV(keyMaterial.Key, keyMaterial.IV);
+            VerifyKeyandIV(keyMaterial.Key, keyMaterial.IV);
 
-            //_streams = streams;
-            //_aesAlg = Aes.Create();
-            //_aesAlg.IV = keyMaterial.IV;
-            //_aesAlg.Key = keyMaterial.Key;
-            //_aesAlg.KeySize = 32;
-            //_aesAlg.Mode = CipherMode.CBC;
+            _streams = streams;
+            _aesAlg = Aes.Create();
+            _aesAlg.IV = keyMaterial.IV;
+            _aesAlg.Key = keyMaterial.Key;
+            _aesAlg.KeySize = 256;
+            _aesAlg.Mode = CipherMode.CBC;
+            _aesAlg.Padding = PaddingMode.PKCS7;
         }
 
-        public Task DecryptAsync(CancellationToken cancellationToken = default)
+        public async Task DecryptAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            if (disposedValue)
+            {
+                throw new ObjectDisposedException(nameof(_aesAlg));
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using (var decryptor = _aesAlg.CreateDecryptor())
+            {
+                using(var cs = new CryptoStream(_streams.OutputStream, decryptor, CryptoStreamMode.Write))
+                {
+                    await _streams.InputStream.CopyToAsync(cs, 81920, cancellationToken);
+                }
+            }
         }
 
-        public Task EncryptAsync(CancellationToken cancellationToken = default)
+        public async Task EncryptAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            if (disposedValue)
+            {
+                throw new ObjectDisposedException(nameof(_aesAlg));
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using(var encryptor = _aesAlg.CreateEncryptor())
+            {
+                using(var cs = new CryptoStream(_streams.OutputStream, encryptor, CryptoStreamMode.Write))
+                {
+                    await _streams.InputStream.CopyToAsync(cs, 81920, cancellationToken);
+                }
+            }
         }
 
         private void VerifyKeyandIV(byte[] key, byte[] iv)
