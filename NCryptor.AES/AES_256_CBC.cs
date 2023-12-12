@@ -10,38 +10,41 @@ namespace AES
     public class AES_256_CBC : ICryptoService
     {
         private bool disposedValue;
+        private readonly IAESKeyMaterial _keyMaterial;
         private readonly IStreamProvider _streams;
-        private readonly Aes _aesAlg;
 
-        /// <exception cref="ArgumentNullException"> is thrown when the <see cref="IKeyMaterial.Key"/> or <see cref="IKeyMaterial.IV"/> or <see cref="IStreamProvider.InputStream"/> or <see cref="IStreamProvider.OutputStream"/> is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"> is thrown when <see cref="IKeyMaterial.Key"/> or <see cref="IKeyMaterial.IV"/> lengths are invalid.</exception>
+        /// <exception cref="ArgumentNullException"> is thrown when the <see cref="IAESKeyMaterial.Key"/> or <see cref="IAESKeyMaterial.IV"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"> is thrown when <see cref="IAESKeyMaterial.Key"/> or <see cref="IAESKeyMaterial.IV"/> lengths are invalid.</exception>
         public AES_256_CBC(IStreamProvider streams, IAESKeyMaterial keyMaterial)
         {
             VerifyKeyandIV(keyMaterial.Key, keyMaterial.IV);
-
+            _keyMaterial = keyMaterial;
             _streams = streams;
-            _aesAlg = Aes.Create();
-            _aesAlg.IV = keyMaterial.IV;
-            _aesAlg.Key = keyMaterial.Key;
-            _aesAlg.KeySize = 256;
-            _aesAlg.Mode = CipherMode.CBC;
-            _aesAlg.Padding = PaddingMode.PKCS7;
         }
 
         public async Task DecryptAsync(CancellationToken cancellationToken = default)
         {
             if (disposedValue)
             {
-                throw new ObjectDisposedException(nameof(_aesAlg));
+                throw new ObjectDisposedException(nameof(AES_256_CBC));
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var decryptor = _aesAlg.CreateDecryptor())
+            using (var aesAlg = Aes.Create())
             {
-                using(var cs = new CryptoStream(_streams.OutputStream, decryptor, CryptoStreamMode.Write))
+                aesAlg.KeySize = 256;
+                aesAlg.Mode = CipherMode.CBC;
+                aesAlg.Padding = PaddingMode.PKCS7;
+                aesAlg.Key = _keyMaterial.Key;
+                aesAlg.IV = _keyMaterial.IV;
+
+                using (var decryptor = aesAlg.CreateDecryptor())
                 {
-                    await _streams.InputStream.CopyToAsync(cs, 81920, cancellationToken);
+                    using (var cs = new CryptoStream(_streams.OutputStream, decryptor, CryptoStreamMode.Write))
+                    {
+                        await _streams.InputStream.CopyToAsync(cs, 81920, cancellationToken);
+                    }
                 }
             }
         }
@@ -50,16 +53,25 @@ namespace AES
         {
             if (disposedValue)
             {
-                throw new ObjectDisposedException(nameof(_aesAlg));
+                throw new ObjectDisposedException(nameof(AES_256_CBC));
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            using(var encryptor = _aesAlg.CreateEncryptor())
+            using (var aesAlg = Aes.Create())
             {
-                using(var cs = new CryptoStream(_streams.OutputStream, encryptor, CryptoStreamMode.Write))
+                aesAlg.KeySize = 256;
+                aesAlg.Mode = CipherMode.CBC;
+                aesAlg.Padding = PaddingMode.PKCS7;
+                aesAlg.Key = _keyMaterial.Key;
+                aesAlg.IV = _keyMaterial.IV;
+
+                using (var encryptor = aesAlg.CreateEncryptor())
                 {
-                    await _streams.InputStream.CopyToAsync(cs, 81920, cancellationToken);
+                    using (var cs = new CryptoStream(_streams.OutputStream, encryptor, CryptoStreamMode.Write))
+                    {
+                        await _streams.InputStream.CopyToAsync(cs, 81920, cancellationToken);
+                    }
                 }
             }
         }
@@ -94,7 +106,7 @@ namespace AES
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
-                    _aesAlg.Dispose();
+                    
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
