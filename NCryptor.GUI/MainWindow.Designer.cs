@@ -41,6 +41,7 @@
             this.btn_Encrypt.TabIndex = 0;
             this.btn_Encrypt.Text = "Encrypt Files";
             this.btn_Encrypt.UseVisualStyleBackColor = true;
+            this.btn_Encrypt.Click += new System.EventHandler(this.Btn_Encrypt_OnClick);
             // 
             // btn_Decrypt
             // 
@@ -51,6 +52,7 @@
             this.btn_Decrypt.TabIndex = 0;
             this.btn_Decrypt.Text = "Decrypt Files";
             this.btn_Decrypt.UseVisualStyleBackColor = true;
+            this.btn_Decrypt.Click += new System.EventHandler(this.Btn_Decrypt_Click);
             // 
             // MainWindow
             // 
