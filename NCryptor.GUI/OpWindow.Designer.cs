@@ -125,6 +125,8 @@
             this.btn_BrowseOut.TabIndex = 3;
             this.btn_BrowseOut.Text = "Browse";
             this.btn_BrowseOut.UseVisualStyleBackColor = true;
+
+            this.btn_BrowseOut.Click += Btn_BrowseOut_OnClick;
             // 
             // label1
             // 

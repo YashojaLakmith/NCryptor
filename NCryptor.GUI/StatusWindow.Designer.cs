@@ -1,4 +1,6 @@
-﻿namespace NCryptor.GUI
+﻿using System;
+
+namespace NCryptor.GUI
 {
     partial class StatusWindow
     {
@@ -15,6 +17,8 @@
         {
             if (disposing && (components != null))
             {
+                _cancellationTokenSource.Dispose();
+                Array.Clear(_key, 0, _key.Length);
                 components.Dispose();
             }
             base.Dispose(disposing);
@@ -28,13 +32,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.Shown += Form_OnShow_HideParent;
-            this.FormClosed += Form_OnClose_ShowParent;
-
             this.btn_Cancel = new System.Windows.Forms.Button();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.listView_Log = new System.Windows.Forms.ListView();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
             this.label_Status = new System.Windows.Forms.Label();
+            this.listbox_Log = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
             // 
             // btn_Cancel
@@ -48,21 +49,12 @@
             this.btn_Cancel.UseVisualStyleBackColor = true;
             this.btn_Cancel.Click += new System.EventHandler(this.Btn_Cancel_OnClick);
             // 
-            // progressBar1
+            // progressBar
             // 
-            this.progressBar1.Location = new System.Drawing.Point(13, 341);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(504, 23);
-            this.progressBar1.TabIndex = 1;
-            // 
-            // listView_Log
-            // 
-            this.listView_Log.HideSelection = false;
-            this.listView_Log.Location = new System.Drawing.Point(13, 13);
-            this.listView_Log.Name = "listView_Log";
-            this.listView_Log.Size = new System.Drawing.Size(603, 290);
-            this.listView_Log.TabIndex = 2;
-            this.listView_Log.UseCompatibleStateImageBehavior = false;
+            this.progressBar.Location = new System.Drawing.Point(13, 341);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(504, 23);
+            this.progressBar.TabIndex = 1;
             // 
             // label_Status
             // 
@@ -73,14 +65,24 @@
             this.label_Status.TabIndex = 3;
             this.label_Status.Text = "status";
             // 
+            // listbox_Log
+            // 
+            this.listbox_Log.FormattingEnabled = true;
+            this.listbox_Log.ItemHeight = 16;
+            this.listbox_Log.Location = new System.Drawing.Point(13, 13);
+            this.listbox_Log.Name = "listbox_Log";
+            this.listbox_Log.SelectionMode = System.Windows.Forms.SelectionMode.None;
+            this.listbox_Log.Size = new System.Drawing.Size(603, 292);
+            this.listbox_Log.TabIndex = 4;
+            // 
             // StatusWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(635, 376);
+            this.Controls.Add(this.listbox_Log);
             this.Controls.Add(this.label_Status);
-            this.Controls.Add(this.listView_Log);
-            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btn_Cancel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -94,10 +96,9 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.Button btn_Cancel;
-        private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.ListView listView_Log;
-        private System.Windows.Forms.Label label_Status;
+        protected System.Windows.Forms.ProgressBar progressBar;
+        protected System.Windows.Forms.ListBox listbox_Log;
+        protected System.Windows.Forms.Label label_Status;
+        protected System.Windows.Forms.Button btn_Cancel;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Windows.Forms;
 
 namespace NCryptor.GUI
@@ -33,7 +34,8 @@ namespace NCryptor.GUI
 
         protected override void Btn_Start_OnClick(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            var bKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
+            new DecryptTaskWindow(this, _filePaths, _outputDir, bKey).Show();
         }
     }
 }

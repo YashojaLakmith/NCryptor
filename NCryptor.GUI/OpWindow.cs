@@ -9,7 +9,7 @@ namespace NCryptor.GUI
     public abstract partial class OpWindow : Form, IParentWindowAccess
     {
         private readonly IParentWindowAccess _mainWindowAccess;
-        private string _outputDir;
+        protected string _outputDir;
         protected List<string> _filePaths;
 
         internal OpWindow(IParentWindowAccess mainWindowAccess)
