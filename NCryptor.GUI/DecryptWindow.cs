@@ -8,7 +8,7 @@ namespace NCryptor.GUI
     {
         public DecryptWindow(IParentWindowAccess parentWindowAccess) : base(parentWindowAccess)
         {
-            Text = "Encrypt Files";
+            Text = "Decrypt Files";
         }
 
         protected override void Btn_BrowseFiles_OnClick(object sender, EventArgs e)
@@ -18,7 +18,7 @@ namespace NCryptor.GUI
                 ofd.CheckFileExists = true;
                 ofd.CheckPathExists = true;
                 ofd.Title = "Select files to encrypt";
-                ofd.Filter = "Encryptor files (*.enc1)|*.enc1";
+                ofd.Filter = "Encryptor files (*.NCRYPT)|*.NCRYPT";
                 ofd.Multiselect = true;
 
                 if (ofd.ShowDialog() == DialogResult.OK)

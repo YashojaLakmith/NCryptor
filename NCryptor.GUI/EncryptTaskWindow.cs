@@ -28,7 +28,7 @@ namespace NCryptor.GUI
 
                 if (_cancellationTokenSource.IsCancellationRequested)
                 {
-                    LogToWindow($"Encryption cancelled by the user");
+                    LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Operation cancelled by the user");
                     break;
                 }
 
@@ -59,6 +59,9 @@ namespace NCryptor.GUI
                             using (var aesAlg = Aes.Create())
                             {
                                 aesAlg.KeySize = 256;
+                                aesAlg.Mode = CipherMode.CBC;
+                                aesAlg.Padding = PaddingMode.PKCS7;
+                                aesAlg.Key = encKey;
                                 aesAlg.GenerateIV();
 
                                 streamOut.Position = 0;
@@ -76,12 +79,11 @@ namespace NCryptor.GUI
                                         byte[] buffer = new byte[BUFFER_SIZE];
                                         int bytesRead;
 
-                                        while ((bytesRead = await streamIn.ReadAsync(buffer, 0, buffer.Length, _cancellationTokenSource.Token)) > 0)
+                                        while ((bytesRead = await streamIn.ReadAsync(buffer, 0, BUFFER_SIZE, _cancellationTokenSource.Token)) > 0)
                                         {
-                                            CalculateProgress(streamIn.Position, streamIn.Length);
+                                            UpdateProgress(streamIn.Position, streamIn.Length);
                                             await cs.WriteAsync(buffer, 0, bytesRead, _cancellationTokenSource.Token);
                                         }
-
                                         cs.FlushFinalBlock();
                                     }
                                 }
@@ -90,7 +92,7 @@ namespace NCryptor.GUI
                     }                                    
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Success");
                 }
-                catch(TaskCanceledException _)
+                catch(OperationCanceledException _)
                 {
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Operation cancelled by the user");
                     ClearUnfinishedFiles(outputPath);
@@ -103,13 +105,14 @@ namespace NCryptor.GUI
                 }
                 finally
                 {
-                    Array.Clear(keyM, 0, keyM.Length);
-                    Array.Clear(encKey, 0, encKey.Length);
+                    ZeroArray(keyM);
+                    ZeroArray(encKey);
                 }
             }
             progressBar.Value = 0;            
             label_Status.Text = "Completed";
             btn_Cancel.Enabled = false;
+            _isInProgress = false;
         }
 
         protected override string GetOutputFilePath(string inputFile)

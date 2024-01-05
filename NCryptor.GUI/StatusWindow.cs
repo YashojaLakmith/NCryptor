@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +18,6 @@ namespace NCryptor.GUI
         protected readonly byte[] _key;
         protected readonly List<string> _paths;
         protected readonly string _outputDir;
-        protected readonly BackgroundWorker _worker;
         protected bool _isInProgress;
         
 
@@ -28,7 +28,6 @@ namespace NCryptor.GUI
             _key = key;
             _paths = paths.ToList();
             _outputDir = outputDir;
-            _worker = new BackgroundWorker();
             _isInProgress = true;
 
             Shown += Form_OnShow_HideParent;
@@ -43,6 +42,11 @@ namespace NCryptor.GUI
 
         private async void OnCloseButtonClick(object sender, FormClosingEventArgs e)
         {
+            if (!_isInProgress)
+            {
+                return;
+            }
+
             if(e.CloseReason != CloseReason.UserClosing)
             {
                 return;
@@ -79,6 +83,7 @@ namespace NCryptor.GUI
             {
                 _cancellationTokenSource.Cancel();
                 btn_Cancel.Enabled = false;
+                _isInProgress = false;
             }
         }
 
@@ -99,7 +104,7 @@ namespace NCryptor.GUI
 
         protected abstract string GetOutputFilePath(string inputFile);
 
-        protected void CalculateProgress(long current, long total)
+        protected void UpdateProgress(long current, long total)
         {
             progressBar.Value = (int)(current * 100 / total);
         }
@@ -111,5 +116,21 @@ namespace NCryptor.GUI
                 File.Delete(path);
             }
         }
+
+        protected bool CompareByteArrays(byte[] a, byte[] b)
+        {
+            return a.Length == b.Length && memcmp(a, b, a.Length) == 0;
+        }
+
+        protected void ZeroArray(byte[] a)
+        {
+            memset(a, 0, a.Length);
+        }
+
+        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+        static extern int memcmp(byte[] b1, byte[] b2, long count);
+
+        [DllImport("msvcrt.dll", CallingConvention =CallingConvention.Cdecl)]
+        static extern IntPtr memset(byte[] b, int value, long count);
     }
 }
