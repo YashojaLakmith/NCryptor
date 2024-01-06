@@ -47,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AES_KeyMaterial.cs" />
+    <Compile Include="Crypto\AES_256_CBC_PKCS7.cs" />
+    <Compile Include="Crypto\KeyDerivation.cs" />
+    <Compile Include="Crypto\RNG.cs" />
     <Compile Include="DecryptTaskWindow.cs">
       <SubType>Form</SubType>
     </Compile>

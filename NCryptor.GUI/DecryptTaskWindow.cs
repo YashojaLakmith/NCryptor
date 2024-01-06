@@ -4,15 +4,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+
+using NCryptor.GUI.Crypto;
 
 namespace NCryptor.GUI
 {
     internal class DecryptTaskWindow : StatusWindow
     {
-        public DecryptTaskWindow(IParentWindowAccess parentWindow, IEnumerable<string> paths, string outputDir, byte[] key) : base(parentWindow, paths, outputDir, key)
+        public DecryptTaskWindow(IParentWindowAccess parentWindow, IEnumerable<string> paths, SymmetricAlgorithm alg, string outputDir, byte[] key) : base(parentWindow, paths, alg, outputDir, key)
         {
             Text = "Decryption in progress";
         }
@@ -21,8 +21,9 @@ namespace NCryptor.GUI
         {
             var count = _paths.Count;
             var timer = Stopwatch.StartNew();
+            const int BUFFER_SIZE = 81920;
 
-            for(int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 var outputPath = GetOutputFilePath(_paths[i]);
 
@@ -30,81 +31,65 @@ namespace NCryptor.GUI
                 {
                     progressBar.Value = 0;
                     label_Status.Text = $"File {i + 1} of {count}";
-
-                    if (_cancellationTokenSource.IsCancellationRequested)
-                    {
-                        LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Operation cancelled by the user");
-                        break;
-                    }
+                    
+                    _cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
                     if (!File.Exists(_paths[i]))
                     {
                         LogToWindow($"{_paths[i]} not found");
                         continue;
                     }
-                    //iv, salt, tag
+                    LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Decrypting {_paths[i]}");
 
-                    using(var fsIn = new FileStream(_paths[i], FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var fsIn = new FileStream(_paths[i], FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
-                        LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Decrypting {_paths[i]}");
+                        // 1.IV, 2.Salt, 3.Tag
+                        (var iv, var salt, var tag) = await FileStreams.ReadMetadataAsync(fsIn, 0, _cancellationTokenSource.Token);
+                        (var encKey, var calculatedTag) = KeyDerivation.GetKeyAndVerificationTag(_key, salt, 32, 32, 100000);
 
-                        var salt = new byte[32];
-                        var iv = new byte[16];
-                        var verifyTag = new byte[32];
-
-                        fsIn.Position = 0;
-                        await fsIn.ReadAsync(iv, 0, 16, _cancellationTokenSource.Token);
-                        await fsIn.ReadAsync(salt, 0, 32, _cancellationTokenSource.Token);
-                        await fsIn.ReadAsync(verifyTag, 0, 32, _cancellationTokenSource.Token);
-
-                        var keyM = DeriveKey(_key, salt, 64);
-                        var key = keyM.Take(32).ToArray();
-                        var calculatedTag = keyM.Skip(32).ToArray();
-
-                        if(!CompareByteArrays(verifyTag, calculatedTag))
+                        if (!CompareByteArrays(tag, calculatedTag))
                         {
                             LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Incorrect key.");
                         }
 
                         using (var fsOut = new FileStream(outputPath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read))
                         {
-                            using (var aesAlg = Aes.Create())
+                            _algorithm.Key = encKey;
+                            _algorithm.IV = iv;
+
+                            using (var decryptor = _algorithm.CreateDecryptor())
                             {
-                                aesAlg.KeySize = 256;
-                                aesAlg.Mode = CipherMode.CBC;
-                                aesAlg.Padding = PaddingMode.PKCS7;
-                                aesAlg.Key = key;
-                                aesAlg.IV = iv;
-
-                                using (var decryptor = aesAlg.CreateDecryptor())
+                                using (var cs = new CryptoStream(fsOut, decryptor, CryptoStreamMode.Write))
                                 {
-                                    using(var cs = new CryptoStream(fsOut, decryptor, CryptoStreamMode.Write))
-                                    {
-                                        const int BUFFER_SIZE = 81920;
-                                        var buffer = new byte[BUFFER_SIZE];
-                                        int bytesRead;
+                                    var buffer = new byte[BUFFER_SIZE];
+                                    int bytesRead;
 
-                                        while((bytesRead = await fsIn.ReadAsync(buffer, 0, BUFFER_SIZE)) > 0)
-                                        {
-                                            UpdateProgress(fsIn.Position, fsIn.Length);
-                                            await cs.WriteAsync(buffer, 0, bytesRead, _cancellationTokenSource.Token);
-                                        }
-                                        cs.FlushFinalBlock();
+                                    while ((bytesRead = await fsIn.ReadAsync(buffer, 0, BUFFER_SIZE)) > 0)
+                                    {
+                                        UpdateProgress(fsIn.Position, fsIn.Length);
+                                        await cs.WriteAsync(buffer, 0, bytesRead, _cancellationTokenSource.Token);
                                     }
+                                    cs.FlushFinalBlock();
                                 }
                             }
                         }
-                        ZeroArray(keyM);
-                        ZeroArray(key);
+                        MemsetArray(encKey);
                     }
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Success");
                 }
-                catch(OperationCanceledException ex)
+                catch (OperationCanceledException)
                 {
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Operation cancelled by the user");
                     ClearUnfinishedFiles(outputPath);
+
+                    progressBar.Value = 0;
+                    Text = "Cancelled";
+                    label_Status.Text = "Cancelled";
+                    btn_Cancel.Enabled = false;
+                    _isInProgress = false;
+                    return;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     LogToWindow($"{ex.Message}");
                     ClearUnfinishedFiles(outputPath);
@@ -113,7 +98,11 @@ namespace NCryptor.GUI
                 {
                 }
             }
+
+            timer.Stop();
+               
             progressBar.Value = 0;
+            Text = "Completed";
             label_Status.Text = "Completed";
             btn_Cancel.Enabled = false;
             _isInProgress = false;

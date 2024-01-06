@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+
+using NCryptor.GUI.Crypto;
 
 namespace NCryptor.GUI
 {
@@ -12,10 +15,14 @@ namespace NCryptor.GUI
         protected string _outputDir;
         protected List<string> _filePaths;
 
+        // Should be disposed in the dispose method of the parent class.
+        protected SymmetricAlgorithm _alg;
+
         internal OpWindow(IParentWindowAccess mainWindowAccess)
         {
             _mainWindowAccess = mainWindowAccess;
             _filePaths = new List<string>();
+            _alg = AES_256_CBC_PKCS7.CreateObject();
             _outputDir = "";
 
             InitializeComponent();

@@ -2,6 +2,8 @@
 using System.Text;
 using System.Windows.Forms;
 
+using NCryptor.GUI.Crypto;
+
 namespace NCryptor.GUI
 {
     internal class DecryptWindow : OpWindow
@@ -25,17 +27,15 @@ namespace NCryptor.GUI
                 {
                     AddToListBox(ofd.FileNames);
                 }
-                else
-                {
-                    MessageBox.Show("An error occured.", "Failed to open browse", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
             }
         }
 
         protected override void Btn_Start_OnClick(object sender, EventArgs e)
         {
             var bKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
-            new DecryptTaskWindow(this, _filePaths, _outputDir, bKey).Show();
+            new DecryptTaskWindow(this, _filePaths, _alg, _outputDir, bKey).Show();
+
+            //memset the key
         }
     }
 }

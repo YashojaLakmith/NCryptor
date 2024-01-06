@@ -17,6 +17,7 @@
             {
                 components.Dispose();
             }
+            _alg.Dispose();
             base.Dispose(disposing);
         }
 

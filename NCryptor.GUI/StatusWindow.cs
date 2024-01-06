@@ -15,16 +15,18 @@ namespace NCryptor.GUI
     {
         private readonly IParentWindowAccess _parentWindow;
         protected readonly CancellationTokenSource _cancellationTokenSource;
+        protected readonly SymmetricAlgorithm _algorithm;
         protected readonly byte[] _key;
         protected readonly List<string> _paths;
         protected readonly string _outputDir;
         protected bool _isInProgress;
         
 
-        internal StatusWindow(IParentWindowAccess parentWindow, IEnumerable<string> paths, string outputDir, byte[] key)
+        internal StatusWindow(IParentWindowAccess parentWindow, IEnumerable<string> paths, SymmetricAlgorithm algorithm, string outputDir, byte[] key)
         {
             _cancellationTokenSource = new CancellationTokenSource();
             _parentWindow = parentWindow;
+            _algorithm = algorithm;
             _key = key;
             _paths = paths.ToList();
             _outputDir = outputDir;
@@ -122,7 +124,7 @@ namespace NCryptor.GUI
             return a.Length == b.Length && memcmp(a, b, a.Length) == 0;
         }
 
-        protected void ZeroArray(byte[] a)
+        protected void MemsetArray(byte[] a)
         {
             memset(a, 0, a.Length);
         }

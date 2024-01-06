@@ -1,52 +1,42 @@
-﻿using System.IO;
-
-using NCryptor.Core;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NCryptor.GUI
 {
-    internal class FileStreams : IStreamProvider
+    internal class FileStreams
     {
-        private bool disposedValue = false;
-
-        public FileStreams(string pathIn, string pathOut)
+        internal static async Task<long> WriteMetadataAsync(Stream targetStream, long startPosition, IEnumerable<byte[]> metadata, CancellationToken cancellationToken = default)
         {
-            InputStream = File.Open(pathIn, FileMode.Open, FileAccess.Read, FileShare.Read);
-            OutputStream = File.Open(pathOut, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-        }
+            cancellationToken.ThrowIfCancellationRequested();
 
-        public Stream InputStream {  get; private set; }
+            targetStream.Position = startPosition;
 
-        public Stream OutputStream { get; private set; }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
+            foreach (var entry in metadata)
             {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                    InputStream.Dispose();
-                    OutputStream.Dispose();
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                disposedValue = true;
+                await targetStream.WriteAsync(entry, 0, entry.Length, cancellationToken);
             }
+
+            return targetStream.Position;
         }
 
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~FileStreams()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
-
-        public void Dispose()
+        internal static async Task<(byte[], byte[], byte[])> ReadMetadataAsync(Stream inputStream, long startPosition, CancellationToken cancellationToken = default)
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            System.GC.SuppressFinalize(this);
+            // 1.IV, 2.Salt, 3.Tag
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            inputStream.Position = startPosition;
+            var iv = new byte[16];
+            var salt = new byte[32];
+            var tag = new byte[32];
+
+            await inputStream.ReadAsync(iv, 0, 16, cancellationToken);
+            await inputStream.ReadAsync(salt, 0, 32, cancellationToken);
+            await inputStream.ReadAsync(tag, 0, 32, cancellationToken);
+
+            return (iv, salt, tag);
         }
     }
 }
