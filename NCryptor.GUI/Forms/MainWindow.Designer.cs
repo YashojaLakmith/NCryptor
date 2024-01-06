@@ -1,4 +1,4 @@
-﻿namespace NCryptor.GUI
+﻿namespace NCryptor.GUI.Forms
 {
     partial class MainWindow
     {

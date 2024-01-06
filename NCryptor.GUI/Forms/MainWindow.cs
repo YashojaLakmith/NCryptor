@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace NCryptor.GUI
+namespace NCryptor.GUI.Forms
 {
     public partial class MainWindow : Form, IParentWindowAccess
     {

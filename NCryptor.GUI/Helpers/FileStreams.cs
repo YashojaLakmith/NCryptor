@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NCryptor.GUI
+namespace NCryptor.GUI.Helpers
 {
     internal class FileStreams
     {

@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Threading;
 using System.Threading.Tasks;
 
 using NCryptor.GUI.Crypto;
+using NCryptor.GUI.Helpers;
 
-namespace NCryptor.GUI
+namespace NCryptor.GUI.Forms
 {
     internal class EncryptTaskWindow : StatusWindow
     {

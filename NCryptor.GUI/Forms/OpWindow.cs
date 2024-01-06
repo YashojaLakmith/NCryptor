@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 using NCryptor.GUI.Crypto;
 
-namespace NCryptor.GUI
+namespace NCryptor.GUI.Forms
 {
     public abstract partial class OpWindow : Form, IParentWindowAccess
     {

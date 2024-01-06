@@ -2,7 +2,7 @@
 using System.Text;
 using System.Windows.Forms;
 
-namespace NCryptor.GUI
+namespace NCryptor.GUI.Forms
 {
     internal class EncryptWindow : OpWindow
     {

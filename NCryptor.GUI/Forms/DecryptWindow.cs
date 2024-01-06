@@ -2,9 +2,7 @@
 using System.Text;
 using System.Windows.Forms;
 
-using NCryptor.GUI.Crypto;
-
-namespace NCryptor.GUI
+namespace NCryptor.GUI.Forms
 {
     internal class DecryptWindow : OpWindow
     {

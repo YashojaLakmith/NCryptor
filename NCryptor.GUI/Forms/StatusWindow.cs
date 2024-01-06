@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace NCryptor.GUI
+namespace NCryptor.GUI.Forms
 {
     public abstract partial class StatusWindow : Form
     {
