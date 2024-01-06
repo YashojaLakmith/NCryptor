@@ -115,15 +115,5 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NCryptor.AES\NCryptor.AES.csproj">
-      <Project>{0aa49d6a-def3-47d2-be18-f9024696d546}</Project>
-      <Name>NCryptor.AES</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NCryptor.Core\NCryptor.Core.csproj">
-      <Project>{26e9f4d9-c0f8-4a87-9930-de3c2058d142}</Project>
-      <Name>NCryptor.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
