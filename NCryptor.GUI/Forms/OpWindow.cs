@@ -27,7 +27,7 @@ namespace NCryptor.GUI.Forms
             _mainWindowAccess = mainWindowAccess;
             _filePaths = new List<string>();
             _alg = AES_256_CBC_PKCS7.CreateObject();
-            _outputDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            _outputDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             InitializeComponent();
 
@@ -75,7 +75,8 @@ namespace NCryptor.GUI.Forms
         {
             if(_outputDir == string.Empty)
             {
-                _outputDir = Assembly.GetExecutingAssembly().Location;
+                var location = Assembly.GetExecutingAssembly().Location;
+                _outputDir = Path.GetDirectoryName(location);
                 textbox_OutputDir.Text = _outputDir;
             }
 

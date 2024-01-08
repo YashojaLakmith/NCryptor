@@ -41,7 +41,7 @@ namespace NCryptor.GUI.Forms
                         continue;
                     }
 
-                    ChangeFileNameIfExists(outputPath);
+                    outputPath = ChangeFileNameIfExists(outputPath);
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Decrypting {_paths[i]}");
 
                     using (var fsIn = new FileStream(_paths[i], FileMode.Open, FileAccess.Read, FileShare.Read))

@@ -40,7 +40,7 @@ namespace NCryptor.GUI.Forms
                         continue;
                     }
 
-                    ChangeFileNameIfExists(outputPath);
+                    outputPath = ChangeFileNameIfExists(outputPath);
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Encrypting {_paths[i]}");
 
                     var salt = RNG.GenRandomBytes(32);

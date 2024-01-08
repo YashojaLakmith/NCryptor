@@ -8,6 +8,7 @@ namespace NCryptor.GUI.Forms
         public MainWindow()
         {
             InitializeComponent();
+            Text = "NCryptor";
         }
 
         public void HideParentWindow()

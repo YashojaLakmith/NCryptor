@@ -106,8 +106,8 @@ namespace NCryptor.GUI.Forms
             var ext = Path.GetExtension(path);
             var file = Path.GetFileNameWithoutExtension(path);
 
-            file += DateTime.Now;
-            return Path.Combine(file, ext);
+            file += $" ({DateTime.Now})";
+            return Path.ChangeExtension(file, ext);
         }
 
         protected void UpdateProgress(long current, long total)
