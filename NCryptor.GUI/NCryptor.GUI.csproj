@@ -57,7 +57,7 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>lock-outlined-padlock-symbol-for-security-interface_icon-icons.com_57803.ico</ApplicationIcon>
+    <ApplicationIcon>61_85304.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
@@ -161,7 +161,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lock-outlined-padlock-symbol-for-security-interface_icon-icons.com_57803.ico" />
+    <Content Include="61_85304.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
