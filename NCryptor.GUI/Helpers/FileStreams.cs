@@ -5,8 +5,15 @@ using System.Threading.Tasks;
 
 namespace NCryptor.GUI.Helpers
 {
+    /// <summary>
+    /// Contains methods for working with the file streams.
+    /// </summary>
     internal class FileStreams
     {
+        /// <summary>
+        /// Writes the data in the given order to the stream starting from the given position.
+        /// </summary>
+        /// <returns>The position of the stream after the data was written.</returns>
         internal static async Task<long> WriteMetadataAsync(Stream targetStream, long startPosition, IEnumerable<byte[]> metadata, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -15,12 +22,21 @@ namespace NCryptor.GUI.Helpers
 
             foreach (var entry in metadata)
             {
+                if(entry is null)
+                {
+                    continue;
+                }
+
                 await targetStream.WriteAsync(entry, 0, entry.Length, cancellationToken);
             }
 
             return targetStream.Position;
         }
 
+        /// <summary>
+        /// Reads the IV, Salt and the Verification tag from the stream.
+        /// </summary>
+        /// <returns>A tuple containing the IV, Salt and the Verification tag.</returns>
         internal static async Task<(byte[], byte[], byte[])> ReadMetadataAsync(Stream inputStream, long startPosition, CancellationToken cancellationToken = default)
         {
             // 1.IV, 2.Salt, 3.Tag

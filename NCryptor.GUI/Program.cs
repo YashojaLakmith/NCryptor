@@ -18,6 +18,8 @@ namespace NCryptor.GUI
         [STAThread]
         static void Main()
         {
+            // A named mutex will be used to allow only a single instance of the application to run.
+
             string appGuid = ((GuidAttribute)Assembly.GetExecutingAssembly()
                                                         .GetCustomAttributes(typeof(GuidAttribute), false)
                                                         .GetValue(0)).Value.ToString();

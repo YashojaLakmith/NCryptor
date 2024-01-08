@@ -10,9 +10,12 @@ using NCryptor.GUI.Helpers;
 
 namespace NCryptor.GUI.Forms
 {
+    /// <summary>
+    /// Moderates the encryption process and updates the UI.
+    /// </summary>
     internal class EncryptTaskWindow : StatusWindow
     {
-        public EncryptTaskWindow(IParentWindowAccess parentWindow, IEnumerable<string> paths, SymmetricAlgorithm alg, string outputDir, byte[] key) : base(parentWindow, paths, alg, outputDir, key)
+        internal EncryptTaskWindow(IParentWindowAccess parentWindow, IEnumerable<string> paths, SymmetricAlgorithm alg, string outputDir, byte[] key) : base(parentWindow, paths, alg, outputDir, key)
         {
             Text = "Encryption in progress";
         }
@@ -21,7 +24,7 @@ namespace NCryptor.GUI.Forms
         {
             var timer = Stopwatch.StartNew();
             var count = _paths.Count;
-            var keySize = _algorithm.KeySize / 8;
+            var keySize = _algorithm.KeySize / 8;   // Size in bytes
             const int BUFFER_SIZE = 81920;
 
             for(int i = 0; i < count; i++)

@@ -13,7 +13,10 @@ using NCryptor.GUI.Crypto;
 
 namespace NCryptor.GUI.Forms
 {
-    public abstract partial class OpWindow : Form, IParentWindowAccess
+    /// <summary>
+    /// Abstract base class for collecting information, validating and proceeding to the encryption and decryption process.
+    /// </summary>
+    internal abstract partial class OpWindow : Form, IParentWindowAccess
     {
         private readonly IParentWindowAccess _mainWindowAccess;
         protected string _outputDir;
@@ -169,6 +172,7 @@ namespace NCryptor.GUI.Forms
             }
         }
 
+        /// <returns><c>true</c> if has directory access rules for modifying. Otherwise <c>false</c></returns>
         private bool EvaluateAccessRules()
         {
             bool writeAllow = false;

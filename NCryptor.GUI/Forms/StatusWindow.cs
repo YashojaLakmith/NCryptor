@@ -11,7 +11,10 @@ using NCryptor.GUI.Helpers;
 
 namespace NCryptor.GUI.Forms
 {
-    public abstract partial class StatusWindow : Form
+    /// <summary>
+    /// Abstract base class for moderating encryption and decryption operation and updating UI.
+    /// </summary>
+    internal abstract partial class StatusWindow : Form
     {
         private readonly IParentWindowAccess _parentWindow;
         protected readonly CancellationTokenSource _cancellationTokenSource;

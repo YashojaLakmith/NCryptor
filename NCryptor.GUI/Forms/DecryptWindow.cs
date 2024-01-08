@@ -4,9 +4,12 @@ using System.Windows.Forms;
 
 namespace NCryptor.GUI.Forms
 {
+    /// <summary>
+    /// Collects the necessary information with UI and validates the before proceeding to the decryption.
+    /// </summary>
     internal class DecryptWindow : OpWindow
     {
-        public DecryptWindow(IParentWindowAccess parentWindowAccess) : base(parentWindowAccess)
+        internal DecryptWindow(IParentWindowAccess parentWindowAccess) : base(parentWindowAccess)
         {
             Text = "Decrypt Files";
         }

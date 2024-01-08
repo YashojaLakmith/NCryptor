@@ -4,10 +4,15 @@ using System.Security.Cryptography;
 
 namespace NCryptor.GUI.Crypto
 {
+    /// <summary>
+    /// Contains static methods for deriving keys and verification tags.
+    /// </summary>
     internal class KeyDerivation
     {
         private KeyDerivation() { }
 
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
         internal static byte[] DeriveKeyPbkdf2(byte[] password, byte[] salt, int size, int iterations)
         {
             if(password is null)
@@ -36,8 +41,15 @@ namespace NCryptor.GUI.Crypto
             }
         }
 
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
         internal static (byte[], byte[]) GetKeyAndVerificationTag(byte[] password, byte[] salt, int keySize, int tagSize, int iterations)
         {
+            if(tagSize < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tagSize));
+            }
+
             var km = DeriveKeyPbkdf2(password, salt, keySize + tagSize, iterations);
             return (km.Take(keySize).ToArray(), km.Skip(keySize).ToArray());
         }

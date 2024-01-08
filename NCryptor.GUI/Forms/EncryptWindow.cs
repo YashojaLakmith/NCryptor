@@ -4,9 +4,12 @@ using System.Windows.Forms;
 
 namespace NCryptor.GUI.Forms
 {
+    /// <summary>
+    /// Collects the required information from the UI and validates them before proceeding to the encryption.
+    /// </summary>
     internal class EncryptWindow : OpWindow
     {
-        public EncryptWindow(IParentWindowAccess parentWindowAccess) : base(parentWindowAccess)
+        internal EncryptWindow(IParentWindowAccess parentWindowAccess) : base(parentWindowAccess)
         {
             Text = "Encrypt Files";
         }

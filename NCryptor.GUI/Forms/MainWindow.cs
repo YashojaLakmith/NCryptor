@@ -3,9 +3,12 @@ using System.Windows.Forms;
 
 namespace NCryptor.GUI.Forms
 {
-    public partial class MainWindow : Form, IParentWindowAccess
+    /// <summary>
+    /// Starter form.
+    /// </summary>
+    internal partial class MainWindow : Form, IParentWindowAccess
     {
-        public MainWindow()
+        internal MainWindow()
         {
             InitializeComponent();
             Text = "NCryptor";
