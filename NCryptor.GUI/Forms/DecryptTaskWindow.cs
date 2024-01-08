@@ -22,6 +22,7 @@ namespace NCryptor.GUI.Forms
             var count = _paths.Count;
             var timer = Stopwatch.StartNew();
             const int BUFFER_SIZE = 81920;
+            var keySize = _algorithm.KeySize / 8;
 
             for (int i = 0; i < count; i++)
             {
@@ -39,17 +40,20 @@ namespace NCryptor.GUI.Forms
                         LogToWindow($"{_paths[i]} not found");
                         continue;
                     }
+
+                    ChangeFileNameIfExists(outputPath);
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Decrypting {_paths[i]}");
 
                     using (var fsIn = new FileStream(_paths[i], FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         // 1.IV, 2.Salt, 3.Tag
                         (var iv, var salt, var tag) = await FileStreams.ReadMetadataAsync(fsIn, 0, _cancellationTokenSource.Token);
-                        (var encKey, var calculatedTag) = KeyDerivation.GetKeyAndVerificationTag(_key, salt, 32, 32, 100000);
+                        (var encKey, var calculatedTag) = KeyDerivation.GetKeyAndVerificationTag(_key, salt, keySize, _tagSize, 100000);
 
-                        if (!CompareByteArrays(tag, calculatedTag))
+                        if (!ExternalMethods.CmpByteArrays(tag, calculatedTag))
                         {
                             LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Incorrect key.");
+                            continue;
                         }
 
                         using (var fsOut = new FileStream(outputPath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read))
@@ -73,7 +77,7 @@ namespace NCryptor.GUI.Forms
                                 }
                             }
                         }
-                        MemsetArray(encKey);
+                        ExternalMethods.ZeroMemset(encKey);
                     }
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Success");
                 }
@@ -93,6 +97,7 @@ namespace NCryptor.GUI.Forms
                 {
                     LogToWindow($"{ex.Message}");
                     ClearUnfinishedFiles(outputPath);
+                    continue;
                 }
                 finally
                 {
@@ -101,7 +106,7 @@ namespace NCryptor.GUI.Forms
 
             timer.Stop();
                
-            progressBar.Value = 0;
+            progressBar.Value = 100;
             Text = "Completed";
             label_Status.Text = "Completed";
             btn_Cancel.Enabled = false;

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using NCryptor.GUI.Helpers;
 
 namespace NCryptor.GUI.Forms
 {
@@ -20,6 +20,7 @@ namespace NCryptor.GUI.Forms
         protected readonly List<string> _paths;
         protected readonly string _outputDir;
         protected bool _isInProgress;
+        protected readonly int _tagSize;
         
 
         internal StatusWindow(IParentWindowAccess parentWindow, IEnumerable<string> paths, SymmetricAlgorithm algorithm, string outputDir, byte[] key)
@@ -31,6 +32,7 @@ namespace NCryptor.GUI.Forms
             _paths = paths.ToList();
             _outputDir = outputDir;
             _isInProgress = true;
+            _tagSize = _algorithm.KeySize / 8;
 
             Shown += Form_OnShow_HideParent;
             FormClosing += OnCloseButtonClick;
@@ -44,12 +46,7 @@ namespace NCryptor.GUI.Forms
 
         private async void OnCloseButtonClick(object sender, FormClosingEventArgs e)
         {
-            if (!_isInProgress)
-            {
-                return;
-            }
-
-            if(e.CloseReason != CloseReason.UserClosing)
+            if (!_isInProgress || e.CloseReason != CloseReason.UserClosing)
             {
                 return;
             }
@@ -74,6 +71,7 @@ namespace NCryptor.GUI.Forms
 
         private void Form_OnClose_ShowParent(object sender, EventArgs e)
         {
+            ExternalMethods.ZeroMemset(_key);
             _parentWindow.ShowParentWindow();
 
         }
@@ -91,20 +89,26 @@ namespace NCryptor.GUI.Forms
 
         protected abstract Task BeginTask();
 
-        protected byte[] DeriveKey(byte[] bytes, byte[] salt, int size)
-        {
-            using(var pbkdf2 = new Rfc2898DeriveBytes(bytes, salt, 100000, HashAlgorithmName.SHA512))
-            {
-                return pbkdf2.GetBytes(size);
-            }
-        }
-
         protected void LogToWindow(string msg)
         {
             listbox_Log.Items.Add(msg);
         }
 
         protected abstract string GetOutputFilePath(string inputFile);
+
+        protected string ChangeFileNameIfExists(string path)
+        {
+            if (!File.Exists(path))
+            {
+                return path;
+            }
+
+            var ext = Path.GetExtension(path);
+            var file = Path.GetFileNameWithoutExtension(path);
+
+            file += DateTime.Now;
+            return Path.Combine(file, ext);
+        }
 
         protected void UpdateProgress(long current, long total)
         {
@@ -118,21 +122,5 @@ namespace NCryptor.GUI.Forms
                 File.Delete(path);
             }
         }
-
-        protected bool CompareByteArrays(byte[] a, byte[] b)
-        {
-            return a.Length == b.Length && memcmp(a, b, a.Length) == 0;
-        }
-
-        protected void MemsetArray(byte[] a)
-        {
-            memset(a, 0, a.Length);
-        }
-
-        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
-        static extern int memcmp(byte[] b1, byte[] b2, long count);
-
-        [DllImport("msvcrt.dll", CallingConvention =CallingConvention.Cdecl)]
-        static extern IntPtr memset(byte[] b, int value, long count);
     }
 }

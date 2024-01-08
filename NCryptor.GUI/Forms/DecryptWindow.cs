@@ -26,14 +26,13 @@ namespace NCryptor.GUI.Forms
                     AddToListBox(ofd.FileNames);
                 }
             }
+            ValidateStartButton();
         }
 
-        protected override void Btn_Start_OnClick(object sender, EventArgs e)
+        protected override void OpenProgressWindow()
         {
             var bKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
             new DecryptTaskWindow(this, _filePaths, _alg, _outputDir, bKey).Show();
-
-            //memset the key
         }
     }
 }

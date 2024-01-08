@@ -100,7 +100,6 @@
             this.btn_Start.TabIndex = 3;
             this.btn_Start.Text = "Start";
             this.btn_Start.UseVisualStyleBackColor = true;
-            this.btn_Start.Click += new System.EventHandler(this.Btn_Start_OnClick);
             // 
             // label_Key
             // 

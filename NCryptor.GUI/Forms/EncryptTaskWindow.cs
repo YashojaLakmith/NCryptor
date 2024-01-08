@@ -40,9 +40,11 @@ namespace NCryptor.GUI.Forms
                         continue;
                     }
 
+                    ChangeFileNameIfExists(outputPath);
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Encrypting {_paths[i]}");
+
                     var salt = RNG.GenRandomBytes(32);
-                    (var encKey, var tag) = KeyDerivation.GetKeyAndVerificationTag(_key, salt, keySize, 32, 100000);
+                    (var encKey, var tag) = KeyDerivation.GetKeyAndVerificationTag(_key, salt, keySize, _tagSize, 100000);
                     _algorithm.Key = encKey;
                     _algorithm.GenerateIV();
 
@@ -71,7 +73,7 @@ namespace NCryptor.GUI.Forms
                             }
                         }
                     }
-                    MemsetArray(encKey);
+                    ExternalMethods.ZeroMemset(encKey);
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Success");
                 }
                 catch(OperationCanceledException)
@@ -92,12 +94,13 @@ namespace NCryptor.GUI.Forms
                 {
                     LogToWindow($"{timer.Elapsed:hh\\:mm\\:ss}: Error: {aex.Message}");
                     ClearUnfinishedFiles(outputPath);
+                    continue;
                 }
                 finally
                 {
                 }
             }
-            progressBar.Value = 0;
+            progressBar.Value = 100;
             Text = "Completed";
             label_Status.Text = "Completed";
             btn_Cancel.Enabled = false;
