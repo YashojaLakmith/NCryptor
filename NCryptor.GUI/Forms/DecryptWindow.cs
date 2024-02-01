@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using NCryptor.GUI.Factories;
 
 namespace NCryptor.GUI.Forms
 {
@@ -9,7 +13,7 @@ namespace NCryptor.GUI.Forms
     /// </summary>
     internal class DecryptWindow : OpWindow
     {
-        internal DecryptWindow(IParentWindowAccess parentWindowAccess) : base(parentWindowAccess)
+        public DecryptWindow() : base()
         {
             Text = "Decrypt Files";
         }
@@ -32,10 +36,32 @@ namespace NCryptor.GUI.Forms
             ValidateStartButton();
         }
 
-        protected override void OpenProgressWindow()
+        protected override async Task OpenProgressWindow()
         {
+            var tokenSource = new CancellationTokenSource();
             var bKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
-            new DecryptTaskWindow(this, _filePaths, _alg, _outputDir, bKey).Show();
+            try
+            {
+                var factory = new ServiceFactory();
+
+                var handler = factory.CreateFileQueueHandler(_filePaths, _outputDir, bKey, tokenSource.Token);
+                var progressWindow = factory.CreateStatusWindow(handler, tokenSource, "Decrypting");
+
+                progressWindow.Shown += ProgressWindow_OnShow;
+                progressWindow.FormClosed += ProgressWindow_OnClose;
+
+                progressWindow.Show();
+                await handler.DecryptTheFilesAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                tokenSource.Dispose();
+                Array.Clear(bKey, 0, bKey.Length);
+            }
         }
     }
 }

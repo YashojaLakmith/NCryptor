@@ -7,29 +7,26 @@ using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using NCryptor.GUI.Crypto;
+using NCryptor.GUI.Parameters;
 
 namespace NCryptor.GUI.Forms
 {
     /// <summary>
     /// Abstract base class for collecting information, validating and proceeding to the encryption and decryption process.
     /// </summary>
-    internal abstract partial class OpWindow : Form, IParentWindowAccess
+    internal abstract partial class OpWindow : Form
     {
         private readonly IParentWindowAccess _mainWindowAccess;
         protected string _outputDir;
         protected List<string> _filePaths;
 
-        // Should be disposed in the dispose method of the parent class.
-        protected SymmetricAlgorithm _alg;
-
-        internal OpWindow(IParentWindowAccess mainWindowAccess)
+        public OpWindow()
         {
-            _mainWindowAccess = mainWindowAccess;
             _filePaths = new List<string>();
-            _alg = AES_256_CBC_PKCS7.CreateObject();
             _outputDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             InitializeComponent();
@@ -37,19 +34,6 @@ namespace NCryptor.GUI.Forms
             textbox_OutputDir.Text = _outputDir;
             textbox_OutputDir.TextChanged += Textbox_Outputdir_OnTextChange;
             btn_Start.Click += Btn_Start_OnClick;
-        }
-
-        private void Form_OnShow_HideParent(object sender, EventArgs e)
-        {
-            textBox_Key.Text = string.Empty;
-            _mainWindowAccess.HideParentWindow();
-            ValidateStartButton();
-        }
-
-        private void Form_OnClose_ShowParent(object sender, EventArgs e)
-        {
-            _mainWindowAccess.ShowParentWindow();
-
         }
 
         private void Btn_BrowseOut_OnClick(object sender, EventArgs e)
@@ -74,7 +58,7 @@ namespace NCryptor.GUI.Forms
             _outputDir = textbox_OutputDir.Text;
         }
 
-        private void Btn_Start_OnClick(object sender, EventArgs e)
+        private async void Btn_Start_OnClick(object sender, EventArgs e)
         {
             if(_outputDir == string.Empty)
             {
@@ -113,10 +97,10 @@ namespace NCryptor.GUI.Forms
                 return;
             }
 
-            OpenProgressWindow();
+            await OpenProgressWindow();
         }
 
-        protected abstract void OpenProgressWindow();
+        protected abstract Task OpenProgressWindow();
 
         protected abstract void Btn_BrowseFiles_OnClick(object sender, EventArgs e);
 
@@ -136,6 +120,16 @@ namespace NCryptor.GUI.Forms
                 listBox_SelectedFiles.Items.Remove(s);
             }
             ValidateStartButton();
+        }
+
+        protected void ProgressWindow_OnShow(object sender, EventArgs e)
+        {
+            Hide();
+        }
+
+        protected void ProgressWindow_OnClose(object sender, EventArgs e)
+        {
+            Show();
         }
 
         protected void AddToListBox(string[] paths)

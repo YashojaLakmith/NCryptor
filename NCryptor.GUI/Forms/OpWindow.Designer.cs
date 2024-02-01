@@ -17,7 +17,6 @@
             {
                 components.Dispose();
             }
-            _alg.Dispose();
             base.Dispose(disposing);
         }
 
@@ -29,9 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.Shown += Form_OnShow_HideParent;
-            this.FormClosed += Form_OnClose_ShowParent;
-
             this.listBox_SelectedFiles = new System.Windows.Forms.ListBox();
             this.textBox_Key = new System.Windows.Forms.TextBox();
             this.btn_BrowseFiles = new System.Windows.Forms.Button();

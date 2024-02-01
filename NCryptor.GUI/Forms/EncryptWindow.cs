@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using NCryptor.GUI.Factories;
 
 namespace NCryptor.GUI.Forms
 {
@@ -9,7 +13,7 @@ namespace NCryptor.GUI.Forms
     /// </summary>
     internal class EncryptWindow : OpWindow
     {
-        internal EncryptWindow(IParentWindowAccess parentWindowAccess) : base(parentWindowAccess)
+        public EncryptWindow() : base()
         {
             Text = "Encrypt Files";
         }
@@ -31,10 +35,31 @@ namespace NCryptor.GUI.Forms
             ValidateStartButton();
         }
 
-        protected override void OpenProgressWindow()
+        protected override async Task OpenProgressWindow()
         {
-            var bKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
-            new EncryptTaskWindow(this, _filePaths, _alg, _outputDir, bKey).Show();
+            var tokenSource = new CancellationTokenSource();
+            var byteKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
+            try
+            {
+                var factory = new ServiceFactory();
+                var handler = factory.CreateFileQueueHandler(_filePaths, _outputDir, byteKey, tokenSource.Token);
+                var progressWindow = factory.CreateStatusWindow(handler, tokenSource, "Encrypting");
+
+                progressWindow.Shown += ProgressWindow_OnShow;
+                progressWindow.FormClosed += ProgressWindow_OnClose;
+
+                progressWindow.Show();
+                await handler.EncryptTheFilesAsync();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Array.Clear(byteKey, 0, byteKey.Length);
+                tokenSource.Dispose();
+            }
         }
     }
 }

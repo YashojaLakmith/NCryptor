@@ -17,8 +17,6 @@ namespace NCryptor.GUI.Forms
         {
             if (disposing && (components != null))
             {
-                _cancellationTokenSource.Dispose();
-                Array.Clear(_key, 0, _key.Length);
                 components.Dispose();
             }
             base.Dispose(disposing);
