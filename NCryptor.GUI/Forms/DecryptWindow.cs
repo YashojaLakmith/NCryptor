@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using NCryptor.GUI.Factories;
+using NCryptor.GUI.Options;
 
 namespace NCryptor.GUI.Forms
 {
@@ -13,8 +14,11 @@ namespace NCryptor.GUI.Forms
     /// </summary>
     internal class DecryptWindow : OpWindow
     {
-        public DecryptWindow() : base()
+        private readonly FileSystemOptions _fileSystemOptions;
+
+        public DecryptWindow(FileSystemOptions fileSystemOptions) : base()
         {
+            _fileSystemOptions = fileSystemOptions;
             Text = "Decrypt Files";
         }
 
@@ -25,7 +29,7 @@ namespace NCryptor.GUI.Forms
                 ofd.CheckFileExists = true;
                 ofd.CheckPathExists = true;
                 ofd.Title = "Select files to encrypt";
-                ofd.Filter = "Encryptor files (*.NCRYPT)|*.NCRYPT";
+                ofd.Filter = $"Encryptor files (*{_fileSystemOptions.Extension})|*{_fileSystemOptions.Extension}";
                 ofd.Multiselect = true;
 
                 if (ofd.ShowDialog() == DialogResult.OK)
@@ -36,7 +40,7 @@ namespace NCryptor.GUI.Forms
             ValidateStartButton();
         }
 
-        protected override async Task OpenProgressWindow()
+        protected override async Task BeginTaskAsync()
         {
             var tokenSource = new CancellationTokenSource();
             var bKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
@@ -47,8 +51,8 @@ namespace NCryptor.GUI.Forms
                 var handler = factory.CreateFileQueueHandler(_filePaths, _outputDir, bKey, tokenSource.Token);
                 var progressWindow = factory.CreateStatusWindow(handler, tokenSource, "Decrypting");
 
-                progressWindow.Shown += ProgressWindow_OnShow;
-                progressWindow.FormClosed += ProgressWindow_OnClose;
+                progressWindow.Shown += StatusWindow_OnShow;
+                progressWindow.FormClosed += StatusWindow_OnClose;
 
                 progressWindow.Show();
                 await handler.DecryptTheFilesAsync();

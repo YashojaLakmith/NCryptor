@@ -35,7 +35,7 @@ namespace NCryptor.GUI.Forms
             ValidateStartButton();
         }
 
-        protected override async Task OpenProgressWindow()
+        protected override async Task BeginTaskAsync()
         {
             var tokenSource = new CancellationTokenSource();
             var byteKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
@@ -45,8 +45,8 @@ namespace NCryptor.GUI.Forms
                 var handler = factory.CreateFileQueueHandler(_filePaths, _outputDir, byteKey, tokenSource.Token);
                 var progressWindow = factory.CreateStatusWindow(handler, tokenSource, "Encrypting");
 
-                progressWindow.Shown += ProgressWindow_OnShow;
-                progressWindow.FormClosed += ProgressWindow_OnClose;
+                progressWindow.Shown += StatusWindow_OnShow;
+                progressWindow.FormClosed += StatusWindow_OnClose;
 
                 progressWindow.Show();
                 await handler.EncryptTheFilesAsync();

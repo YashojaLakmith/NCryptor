@@ -122,7 +122,7 @@
             this.btn_BrowseOut.Text = "Browse";
             this.btn_BrowseOut.UseVisualStyleBackColor = true;
 
-            this.btn_BrowseOut.Click += Btn_BrowseOut_OnClick;
+            this.btn_BrowseOut.Click += Btn_BrowseOutputDirectory_OnClick;
             // 
             // label1
             // 

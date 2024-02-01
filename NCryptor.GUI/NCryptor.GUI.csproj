@@ -215,7 +215,12 @@
     <Compile Include="Events\ProgressPercentageReportedEventArgs.cs" />
     <Compile Include="Events\TaskFinishedDueTo.cs" />
     <Compile Include="Events\TaskFinishedEventArgs.cs" />
-    <Compile Include="Options\NCryptorOptions.cs" />
+    <Compile Include="Helpers\FileServicesImpl.cs" />
+    <Compile Include="Helpers\IFileServices.cs" />
+    <Compile Include="Helpers\KeyDerivationServiceImpl.cs" />
+    <Compile Include="Helpers\IKeyDerivationServices.cs" />
+    <Compile Include="Options\CryptographicOptions.cs" />
+    <Compile Include="Options\FileSystemOptions.cs" />
     <Compile Include="ServiceFactories\DIBasedServiceFactory.cs" />
     <Compile Include="ServiceFactories\IServiceFactory.cs" />
     <Compile Include="ServiceFactories\ServiceFactory.cs" />
@@ -226,9 +231,6 @@
     <Compile Include="Forms\EncryptWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Helpers\ExternalMethods.cs" />
-    <Compile Include="Helpers\FileStreams.cs" />
-    <Compile Include="Forms\IParentWindowAccess.cs" />
     <Compile Include="Forms\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>

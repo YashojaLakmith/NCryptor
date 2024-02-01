@@ -4,14 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.AccessControl;
-using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using NCryptor.GUI.Crypto;
-using NCryptor.GUI.Parameters;
 
 namespace NCryptor.GUI.Forms
 {
@@ -20,7 +16,6 @@ namespace NCryptor.GUI.Forms
     /// </summary>
     internal abstract partial class OpWindow : Form
     {
-        private readonly IParentWindowAccess _mainWindowAccess;
         protected string _outputDir;
         protected List<string> _filePaths;
 
@@ -32,11 +27,11 @@ namespace NCryptor.GUI.Forms
             InitializeComponent();
 
             textbox_OutputDir.Text = _outputDir;
-            textbox_OutputDir.TextChanged += Textbox_Outputdir_OnTextChange;
+            textbox_OutputDir.TextChanged += Textbox_OutputDirectory_OnTextChange;
             btn_Start.Click += Btn_Start_OnClick;
         }
 
-        private void Btn_BrowseOut_OnClick(object sender, EventArgs e)
+        private void Btn_BrowseOutputDirectory_OnClick(object sender, EventArgs e)
         {
             using (var fbd = new FolderBrowserDialog())
             {
@@ -53,7 +48,7 @@ namespace NCryptor.GUI.Forms
             ValidateStartButton();
         }
 
-        private void Textbox_Outputdir_OnTextChange(object sender, EventArgs e)
+        private void Textbox_OutputDirectory_OnTextChange(object sender, EventArgs e)
         {
             _outputDir = textbox_OutputDir.Text;
         }
@@ -97,10 +92,10 @@ namespace NCryptor.GUI.Forms
                 return;
             }
 
-            await OpenProgressWindow();
+            await BeginTaskAsync();
         }
 
-        protected abstract Task OpenProgressWindow();
+        protected abstract Task BeginTaskAsync();
 
         protected abstract void Btn_BrowseFiles_OnClick(object sender, EventArgs e);
 
@@ -122,12 +117,12 @@ namespace NCryptor.GUI.Forms
             ValidateStartButton();
         }
 
-        protected void ProgressWindow_OnShow(object sender, EventArgs e)
+        protected void StatusWindow_OnShow(object sender, EventArgs e)
         {
             Hide();
         }
 
-        protected void ProgressWindow_OnClose(object sender, EventArgs e)
+        protected void StatusWindow_OnClose(object sender, EventArgs e)
         {
             Show();
         }
@@ -143,18 +138,6 @@ namespace NCryptor.GUI.Forms
 
         private void TextBox_Key_OnTextChanged(object sender, EventArgs e)
         {
-            ValidateStartButton();
-        }
-
-        public void HideParentWindow()
-        {
-            Hide();
-        }
-
-        public void ShowParentWindow()
-        {
-            textBox_Key.Text = string.Empty;
-            Show();
             ValidateStartButton();
         }
 

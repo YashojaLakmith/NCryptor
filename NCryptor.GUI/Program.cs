@@ -16,9 +16,9 @@ using NCryptor.GUI.Events;
 using NCryptor.GUI.Factories;
 using NCryptor.GUI.FileQueueHandlers;
 using NCryptor.GUI.Forms;
+using NCryptor.GUI.Helpers;
 using NCryptor.GUI.Metadata;
 using NCryptor.GUI.Options;
-using NCryptor.GUI.Parameters;
 using NCryptor.GUI.Streams;
 
 namespace NCryptor.GUI
@@ -66,7 +66,7 @@ namespace NCryptor.GUI
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
 
-                    var serviceFactory = CompositionRoot();
+                    var serviceFactory = BuildServiceFactory();
                     Application.Run(serviceFactory.CreateMainWindow());
                 }
                 finally
@@ -84,23 +84,28 @@ namespace NCryptor.GUI
             return Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    services.AddSingleton<NCryptorOptions>();
-                    services.AddTransient<IFileStreamFactory, FileStreamFactoryImpl>();
-                    services.AddTransient<IMetadataHandler, MetadataHandlerImpl>();
+                    services.AddSingleton<CryptographicOptions>();
+                    services.AddSingleton<FileSystemOptions>();
+                    services.AddSingleton<IKeyDerivationServices, KeyDerivationServiceImpl>();
+                    services.AddSingleton<IFileServices, FileServicesImpl>();
+                    services.AddSingleton<IFileStreamFactory, FileStreamFactoryImpl>();
+                    services.AddSingleton<IMetadataHandler, MetadataHandlerImpl>();
+
                     services.AddTransient<ISymmetricCryptoService, SymmetricCryptoService>();
                     services.AddSingleton<IFileQueueHandler, FileQueueHandler>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<EncryptWindow>();
                     services.AddTransient<DecryptWindow>();
                     services.AddTransient<StatusWindow>();
-                    services.AddTransient<SymmetricAlgorithm>(container =>
-                    {
-                        var alg = Aes.Create();
-                        alg.KeySize = 256;
-                        alg.Padding = PaddingMode.PKCS7;
-                        alg.Mode = CipherMode.CBC;
-                        return alg;
-                    });
+                    services.AddTransient<SymmetricAlgorithm>(
+                        container =>
+                        {
+                            var alg = Aes.Create();
+                            alg.KeySize = 256;
+                            alg.Padding = PaddingMode.PKCS7;
+                            alg.Mode = CipherMode.CBC;
+                            return alg;
+                        });
                     services.AddTransient<Func<IFileQueueEvents, CancellationTokenSource, string, StatusWindow>>(
                         container =>
                             (events, tokeSource, title) =>
@@ -114,14 +119,15 @@ namespace NCryptor.GUI
                                 var cryptoService = container.GetRequiredService<ISymmetricCryptoService>();
                                 var metadataHandler = container.GetRequiredService<IMetadataHandler>();
                                 var streamFactory = container.GetRequiredService<IFileStreamFactory>();
-                                var options = container.GetRequiredService<NCryptorOptions>();
+                                var fileServices = container.GetRequiredService<IFileServices>();
+                                var keyServices = container.GetRequiredService<IKeyDerivationServices>();
 
-                                return new FileQueueHandler(cryptoService, metadataHandler, streamFactory, options, filePaths, outputDirectory, key, cancellationToken);
+                                return new FileQueueHandler(cryptoService, metadataHandler, streamFactory, fileServices, keyServices, filePaths, outputDirectory, key, cancellationToken);
                             });
                 });
         }
 
-        private static IServiceFactory CompositionRoot()
+        private static IServiceFactory BuildServiceFactory()
         {
             var host = CreateHostBuilder().Build();
             var serviceProvider = host.Services;

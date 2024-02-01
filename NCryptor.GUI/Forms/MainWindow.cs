@@ -25,7 +25,7 @@ namespace NCryptor.GUI.Forms
             window.Show();
         }
 
-        private void Btn_Decrypt_Click(object sender, EventArgs e)
+        private void Btn_Decrypt_OnClick(object sender, EventArgs e)
         {
             var window = new ServiceFactory().CreateDecryptWindow();
             window.Shown += OpWindow_OnShow;

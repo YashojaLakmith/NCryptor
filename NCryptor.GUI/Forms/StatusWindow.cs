@@ -8,7 +8,7 @@ using NCryptor.GUI.Events;
 namespace NCryptor.GUI.Forms
 {
     /// <summary>
-    /// Abstract base class for moderating encryption and decryption operation and updating UI.
+    /// Represents the form for communicating the progress of the operation.
     /// </summary>
     internal partial class StatusWindow : Form
     {
@@ -61,7 +61,7 @@ namespace NCryptor.GUI.Forms
             listbox_Log.Items.Add(e.Message);
         }
 
-        private async void OnCloseButtonClick(object sender, FormClosingEventArgs e)
+        private void OnCloseButtonClick(object sender, FormClosingEventArgs e)
         {
             if (!_isInProgress) { return; }
 
@@ -77,7 +77,6 @@ namespace NCryptor.GUI.Forms
             {
                 _cancellationTokenSource.Cancel();
                 _isInProgress = false;
-                await Task.Delay(500);
             }
             else
             {

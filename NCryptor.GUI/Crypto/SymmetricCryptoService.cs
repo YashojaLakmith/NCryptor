@@ -82,7 +82,7 @@ namespace NCryptor.GUI.Crypto
             }
         }
 
-        protected virtual void ReportProgress(ProgressPercentageReportedEventArgs e)
+        public virtual void ReportProgressPercentage(ProgressPercentageReportedEventArgs e)
         {
             ProgressPercentageReported?.Invoke(this, e);
         }
@@ -96,7 +96,7 @@ namespace NCryptor.GUI.Crypto
         {
             if (previousValue < newValue)
             {
-                ReportProgress(new ProgressPercentageReportedEventArgs(newValue));
+                ReportProgressPercentage(new ProgressPercentageReportedEventArgs(newValue));
                 previousValue = newValue;
             }
         }
