@@ -1,9 +1,9 @@
 ﻿namespace NCryptor.Helpers
 {
-    internal interface IKeyDerivationServices
+    public interface IKeyDerivationServices
     {
         byte[] GenerateRandomBytes(int length);
-        byte[] GenerateRandomIV();
+        byte[] GenerateRandomIv();
         byte[] GenerateRandomSalt();
         (byte[], byte[]) DeriveKeyAndVerificationTag(byte[] password, byte[] salt);
     }

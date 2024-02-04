@@ -2,7 +2,7 @@
 
 namespace NCryptor.Helpers
 {
-    internal class FileServicesImpl : IFileServices
+    public class FileServicesImpl : IFileServices
     {
         private readonly FileSystemOptions _options;
 
@@ -12,24 +12,18 @@ namespace NCryptor.Helpers
         }
 
         public bool CheckFileExistance(string filePath)
-        {
-            return File.Exists(filePath);
-        }
+            =>  File.Exists(filePath);
 
         public string CreateDecryptedFilePath(string originalPath, string outputDirectory)
         {
             var name = Path.GetFileNameWithoutExtension(originalPath);
             var fullPath = Path.Combine(outputDirectory, name);
 
-            if (!CheckFileExistance(fullPath)) return fullPath;
-
-            return RandomlyChangeFileName(fullPath);
+            return !CheckFileExistance(fullPath) ? fullPath : RandomlyChangeFileName(fullPath);
         }
 
         public string CreateEncryptedFilePath(string originalPath, string outputDirectory)
         {
-            var ext = Path.GetExtension(originalPath);
-            var nameWithoutExt = Path.GetFileNameWithoutExtension(originalPath);
             var nameWithExt = Path.GetFileName(originalPath);
             var tempName = Path.Combine(outputDirectory, nameWithExt);
 
@@ -44,7 +38,7 @@ namespace NCryptor.Helpers
             if (CheckFileExistance(filePath)) File.Delete(filePath);
         }
 
-        private string RandomlyChangeFileName(string filePath)
+        private static string RandomlyChangeFileName(string filePath)
         {
             var ext = Path.GetExtension(filePath);
             var nameWithoutExt = Path.GetFileNameWithoutExtension(filePath);

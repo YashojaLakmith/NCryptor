@@ -17,7 +17,7 @@ using NCryptor.Streams;
 
 namespace NCryptor
 {
-    internal static class Program
+    public static class Program
     {
         /// <summary>
         /// The main entry point for the application.
@@ -27,18 +27,17 @@ namespace NCryptor
         {
             // A named mutex will be used to allow only a single instance of the application to run.
 
-            string appGuid = AppConstants.APP_GUID;
-            string mutexId = $"Global\\{appGuid}";
-            bool createdNew;
+            var appGuid = AppConstants.AppGuid;
+            var mutexId = $@"Global\\{appGuid}";
             var rule = new MutexAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null),
                                             MutexRights.FullControl,
                                             AccessControlType.Allow);
             var mutexSettings = new MutexSecurity();
             mutexSettings.AddAccessRule(rule);
 
-            using var mutex = new Mutex(false, mutexId, out createdNew);
+            using var mutex = new Mutex(false, mutexId, out _);
             mutex.SetAccessControl(mutexSettings);
-            bool hasHandle = false;
+            var hasHandle = false;
             try
             {
                 try
@@ -46,7 +45,7 @@ namespace NCryptor
                     hasHandle = mutex.WaitOne(1000, false);
                     if (!hasHandle)
                     {
-                        MessageBox.Show("An instance of the application is already running.", "NCryptor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(@"An instance of the application is already running.", @"NCryptor", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
                 }
@@ -63,10 +62,7 @@ namespace NCryptor
             }
             finally
             {
-                if (hasHandle)
-                {
-                    mutex.ReleaseMutex();
-                }
+                if (hasHandle) mutex.ReleaseMutex();
             }
         }
 

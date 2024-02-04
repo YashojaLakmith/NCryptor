@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents event data for logs.
     /// </summary>
-    internal class LogEmittedEventArgs : EventArgs
+    public class LogEmittedEventArgs : EventArgs
     {
         public string Message { get; }
 

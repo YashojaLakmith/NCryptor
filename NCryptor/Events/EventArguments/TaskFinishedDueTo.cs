@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents reasons for the finish of a task.
     /// </summary>
-    internal enum TaskFinishedDueTo
+    public enum TaskFinishedDueTo
     {
         RanToSuccess,
         CancelledByUser,

@@ -1,6 +1,6 @@
 ﻿namespace NCryptor.Metadata
 {
-    internal class MetadataHandlerImpl : IMetadataHandler
+    public class MetadataHandlerImpl : IMetadataHandler
     {
         public async Task<NcryptorMetadata> ReadMetadataAsync(Stream sourceStream, CancellationToken cancellationToken = default)
         {

@@ -5,7 +5,7 @@ namespace NCryptor.Events
     /// <summary>
     /// Provides capability to publish the progress percentage of a task.
     /// </summary>
-    internal interface IProgressReportable
+    public interface IProgressReportable
     {
         /// <summary>
         /// Raised when progress percentage is published.

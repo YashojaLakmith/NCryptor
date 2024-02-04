@@ -6,34 +6,24 @@ using NCryptor.Forms;
 
 namespace NCryptor.ServiceFactories
 {
-    internal class DIBasedServiceFactory : IServiceFactory
+    public class DIBasedServiceFactory : IServiceFactory
     {
         private readonly IServiceProvider _serviceProvider;
 
         public DIBasedServiceFactory(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
+            => _serviceProvider = serviceProvider;
 
         public DecryptWindow CreateDecryptWindow()
-        {
-            return _serviceProvider.GetRequiredService<DecryptWindow>();
-        }
+            => _serviceProvider.GetRequiredService<DecryptWindow>();
 
         public EncryptWindow CreateEncryptWindow()
-        {
-            return _serviceProvider.GetRequiredService<EncryptWindow>();
-        }
+            => _serviceProvider.GetRequiredService<EncryptWindow>();
 
         public IFileQueueHandler CreateFileQueueHandler()
-        {
-            return _serviceProvider.GetRequiredService<IFileQueueHandler>();
-        }
+            => _serviceProvider.GetRequiredService<IFileQueueHandler>();
 
         public MainWindow CreateMainWindow()
-        {
-            return _serviceProvider.GetRequiredService<MainWindow>();
-        }
+            => _serviceProvider.GetRequiredService<MainWindow>();
 
         public StatusWindow CreateStatusWindow(IFileQueueEvents fileQueueEvents, CancellationTokenSource tokenSource, string title)
         {

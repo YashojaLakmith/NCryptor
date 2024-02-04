@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 
 using NCryptor.Crypto;
-using NCryptor.Events;
 using NCryptor.Events.EventArguments;
 using NCryptor.Helpers;
 using NCryptor.Metadata;
@@ -9,9 +8,9 @@ using NCryptor.Streams;
 
 namespace NCryptor.FileQueueHandlers
 {
-    internal class FileQueueHandlerImpl : IFileQueueHandler
+    public class FileQueueHandlerImpl : IFileQueueHandler
     {
-        private bool disposedValue;
+        private bool _disposedValue;
         private readonly ISymmetricCryptoService _cryptoService;
         private readonly IMetadataHandler _metadataHandler;
         private readonly IFileStreamFactory _streamFactory;
@@ -42,7 +41,7 @@ namespace NCryptor.FileQueueHandlers
 
             try
             {
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                 {
                     PublishProcessingFileIndex(new ProcessingFileCountEventArgs(count, i + 1));
                     var currentFilePath = filePaths[i];
@@ -61,11 +60,11 @@ namespace NCryptor.FileQueueHandlers
 
                         PublishLog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Encrypting {currentFilePath}"));
 
-                        using var fsIn = _streamFactory.CreateReadFileStream(currentFilePath);
-                        using var fsOut = _streamFactory.CreateWriteFileStream(outputFilePath);
-                        byte[] iv = _keyDerivationService.GenerateRandomIV();
-                        byte[] salt = _keyDerivationService.GenerateRandomSalt();
-                        (var encryptionKey, var verificationTag) = _keyDerivationService.DeriveKeyAndVerificationTag(key, salt);
+                        await using var fsIn = _streamFactory.CreateReadFileStream(currentFilePath);
+                        await using var fsOut = _streamFactory.CreateWriteFileStream(outputFilePath);
+                        var iv = _keyDerivationService.GenerateRandomIv();
+                        var salt = _keyDerivationService.GenerateRandomSalt();
+                        var (encryptionKey, verificationTag) = _keyDerivationService.DeriveKeyAndVerificationTag(key, salt);
 
                         using var metadata = NcryptorMetadata.Create(verificationTag, salt, iv);
                         await _metadataHandler.WriteMetadataAsync(metadata, fsOut, cancellationToken);
@@ -114,7 +113,7 @@ namespace NCryptor.FileQueueHandlers
 
             try
             {
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                 {
                     PublishProcessingFileIndex(new ProcessingFileCountEventArgs(count, i + 1));
                     var currentFilePath = filePaths[i];
@@ -180,33 +179,23 @@ namespace NCryptor.FileQueueHandlers
         }
 
         protected virtual void OnProgressReportedByCryptoService(object? sender, ProgressPercentageReportedEventArgs e)
-        {
-            PublishProgressPercentage(e);
-        }
+            => PublishProgressPercentage(e);
 
         protected virtual void PublishProgressPercentage(ProgressPercentageReportedEventArgs e)
-        {
-            ProgressPercentageReported?.Invoke(this, e);
-        }
+            => ProgressPercentageReported?.Invoke(this, e);
 
         protected virtual void PublishLog(LogEmittedEventArgs e)
-        {
-            LogEmitted?.Invoke(this, e);
-        }
+            => LogEmitted?.Invoke(this, e);
 
         protected virtual void PublishProcessingFileIndex(ProcessingFileCountEventArgs e)
-        {
-            ProcessingFileIndexReported?.Invoke(this, e);
-        }
+            => ProcessingFileIndexReported?.Invoke(this, e);
 
         protected virtual void PublishTaskFinished(TaskFinishedEventArgs e)
-        {
-            TaskFinished?.Invoke(this, e);
-        }
+            => TaskFinished?.Invoke(this, e);
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
@@ -215,7 +204,7 @@ namespace NCryptor.FileQueueHandlers
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

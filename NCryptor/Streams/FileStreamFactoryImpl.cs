@@ -1,20 +1,14 @@
 ﻿namespace NCryptor.Streams
 {
-    internal class FileStreamFactoryImpl : IFileStreamFactory
+    public class FileStreamFactoryImpl : IFileStreamFactory
     {
         public FileStream CreateFileStream(string filePath, FileMode fileMode, FileAccess access, FileShare fileShare)
-        {
-            return new FileStream(filePath, fileMode, access, fileShare);
-        }
+            => new(filePath, fileMode, access, fileShare);
 
         public FileStream CreateReadFileStream(string filePath)
-        {
-            return new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        }
+            => new(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         public FileStream CreateWriteFileStream(string filePath)
-        {
-            return new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
-        }
+            => new(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
     }
 }

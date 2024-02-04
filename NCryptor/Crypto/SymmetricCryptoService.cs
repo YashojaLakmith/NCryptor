@@ -3,16 +3,16 @@ using NCryptor.Events.EventArguments;
 
 namespace NCryptor.Crypto
 {
-    internal class SymmetricCryptoService : ISymmetricCryptoService
+    public class SymmetricCryptoService : ISymmetricCryptoService
     {
         private readonly SymmetricAlgorithm _alg;
-        private bool disposedValue;
-        private const int BUFFER_SIZE = 81920;
+        private bool _disposedValue;
+        private const int BufferSize = 81920;
 
         public int KeySizeInBytes => _alg.KeySize / 8;
-        public int IVSizeInBytes => _alg.IV.Length;
+        public int IvSizeInBytes => _alg.IV.Length;
 
-        public event EventHandler<ProgressPercentageReportedEventArgs> ProgressPercentageReported;
+        public event EventHandler<ProgressPercentageReportedEventArgs>? ProgressPercentageReported;
 
         public SymmetricCryptoService(SymmetricAlgorithm algorithm)
         {
@@ -27,21 +27,21 @@ namespace NCryptor.Crypto
             _alg.IV = iv;
 
             using var decryptor = _alg.CreateDecryptor();
-            using var cs = new CryptoStream(outputStream, decryptor, CryptoStreamMode.Write);
-            byte[] buffer = new byte[BUFFER_SIZE];
+            await using var cs = new CryptoStream(outputStream, decryptor, CryptoStreamMode.Write);
+            var buffer = new byte[BufferSize];
             int bytesRead;
-            int previousReportedProgress = 0;
+            var previousReportedProgress = 0;
 
-            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BUFFER_SIZE, cancellationToken)) > 0)
+            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BufferSize, cancellationToken)) > 0)
             {
-                int progress = CalculateProgress(inputStream.Position, inputStream.Length);
+                var progress = CalculateProgress(inputStream.Position, inputStream.Length);
                 ReportProgressIfHigherThanPreviousReported(ref previousReportedProgress, progress);
 
                 await cs.WriteAsync(buffer, 0, bytesRead, cancellationToken);
             }
 
             await cs.FlushFinalBlockAsync(cancellationToken);
-            Array.Clear(buffer, 0, BUFFER_SIZE);
+            Array.Clear(buffer, 0, BufferSize);
         }
 
         public async Task EncryptAsync(Stream inputStream, Stream outputStream, byte[] key, byte[] iv, CancellationToken cancellationToken = default)
@@ -51,45 +51,39 @@ namespace NCryptor.Crypto
             _alg.IV = iv;
 
             using var encryptor = _alg.CreateEncryptor();
-            using var cs = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write);
-            byte[] buffer = new byte[BUFFER_SIZE];
+            await using var cs = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write);
+            var buffer = new byte[BufferSize];
             int bytesRead;
-            int previousReportedProgress = 0;
+            var previousReportedProgress = 0;
 
-            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BUFFER_SIZE, cancellationToken)) > 0)
+            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BufferSize, cancellationToken)) > 0)
             {
-                int progress = CalculateProgress(inputStream.Position, inputStream.Length);
+                var progress = CalculateProgress(inputStream.Position, inputStream.Length);
                 ReportProgressIfHigherThanPreviousReported(ref previousReportedProgress, progress);
 
                 await cs.WriteAsync(buffer, 0, bytesRead, cancellationToken);
             }
 
             await cs.FlushFinalBlockAsync(cancellationToken);
-            Array.Clear(buffer, 0, BUFFER_SIZE);
+            Array.Clear(buffer, 0, BufferSize);
         }
 
-        public virtual void ReportProgressPercentage(ProgressPercentageReportedEventArgs e)
-        {
-            ProgressPercentageReported?.Invoke(this, e);
-        }
+        protected virtual void PublishProgressPercentage(ProgressPercentageReportedEventArgs e)
+            => ProgressPercentageReported?.Invoke(this, e);
 
         private static int CalculateProgress(long currentPosition, long length)
-        {
-            return (int)Math.Round((double)currentPosition / length * 100);
-        }
+            => (int) Math.Round((double) currentPosition / length* 100);
 
         private void ReportProgressIfHigherThanPreviousReported(ref int previousValue, int newValue)
         {
-            if (previousValue < newValue)
-            {
-                ReportProgressPercentage(new ProgressPercentageReportedEventArgs(newValue));
-                previousValue = newValue;
-            }
+            if (previousValue >= newValue) return;
+            PublishProgressPercentage(new ProgressPercentageReportedEventArgs(newValue));
+            previousValue = newValue;
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
@@ -99,7 +93,7 @@ namespace NCryptor.Crypto
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
                 _alg.Key = null;
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

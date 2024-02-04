@@ -1,6 +1,6 @@
 ﻿namespace NCryptor.Helpers
 {
-    internal interface IFileServices
+    public interface IFileServices
     {
         bool CheckFileExistance(string filePath);
         void DeleteFileIfExists(string filePath);

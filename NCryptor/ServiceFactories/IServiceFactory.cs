@@ -4,7 +4,7 @@ using NCryptor.Forms;
 
 namespace NCryptor.ServiceFactories
 {
-    internal interface IServiceFactory
+    public interface IServiceFactory
     {
         MainWindow CreateMainWindow();
         EncryptWindow CreateEncryptWindow();

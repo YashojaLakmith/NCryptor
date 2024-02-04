@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the event data for reason of finishing of a task.
     /// </summary>
-    internal class TaskFinishedEventArgs : EventArgs
+    public class TaskFinishedEventArgs : EventArgs
     {
         public TaskFinishedDueTo Reason { get; }
 

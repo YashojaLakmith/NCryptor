@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents event data for the index of current file index and total number of files.
     /// </summary>
-    internal class ProcessingFileCountEventArgs : EventArgs
+    public class ProcessingFileCountEventArgs : EventArgs
     {
         public int TotalFiles { get; }
         public int CurrentFile { get; }
