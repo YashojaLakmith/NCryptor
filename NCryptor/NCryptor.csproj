@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -19,9 +19,7 @@
     <Compile Update="Forms\EncryptWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="Forms\MainWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Update="Forms\MainWindow.cs" />
     <Compile Update="Forms\OpWindow.cs">
       <SubType>Form</SubType>
     </Compile>
