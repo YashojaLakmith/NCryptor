@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents event data for the progress percentage.
     /// </summary>
-    internal class ProgressPercentageReportedEventArgs : EventArgs
+    public class ProgressPercentageReportedEventArgs : EventArgs
     {
         public int ProgressPercentage { get; }
 

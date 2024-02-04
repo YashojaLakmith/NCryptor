@@ -1,7 +1,7 @@
 ﻿namespace NCryptor.Options
 {
-    internal class FileSystemOptions
+    public class FileSystemOptions
     {
-        public virtual string Extension { get; } = ".NCRYPT";
+        public virtual string Extension { get; } = @".NCRYPT";
     }
 }

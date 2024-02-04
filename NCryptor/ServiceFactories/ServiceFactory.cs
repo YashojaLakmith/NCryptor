@@ -4,38 +4,26 @@ using NCryptor.Forms;
 
 namespace NCryptor.ServiceFactories
 {
-    internal class ServiceFactory : IServiceFactory
+    public class ServiceFactory : IServiceFactory
     {
         private static IServiceFactory _provider;
 
         public static void SetProvider(IServiceFactory provider)
-        {
-            _provider = provider;
-        }        
+            => _provider = provider;
 
         public DecryptWindow CreateDecryptWindow()
-        {
-            return _provider.CreateDecryptWindow();
-        }
+            => _provider.CreateDecryptWindow();
 
         public EncryptWindow CreateEncryptWindow()
-        {
-            return _provider.CreateEncryptWindow();
-        }
+            => _provider.CreateEncryptWindow();
 
         public IFileQueueHandler CreateFileQueueHandler()
-        {
-            return _provider.CreateFileQueueHandler();
-        }
+            => _provider.CreateFileQueueHandler();
 
         public MainWindow CreateMainWindow()
-        {
-            return _provider.CreateMainWindow();
-        }
+            => _provider.CreateMainWindow();
 
         public StatusWindow CreateStatusWindow(IFileQueueEvents fileQueueEvents, CancellationTokenSource tokenSource, string title)
-        {
-            return _provider.CreateStatusWindow(fileQueueEvents, tokenSource, title);
-        }
+            => _provider.CreateStatusWindow(fileQueueEvents, tokenSource, title);
     }
 }

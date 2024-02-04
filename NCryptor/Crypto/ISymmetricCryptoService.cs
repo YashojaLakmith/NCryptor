@@ -7,7 +7,7 @@ namespace NCryptor.Crypto
     /// <summary>
     /// Provides methods for asynchronously encrypting and decrypting streams.
     /// </summary>
-    internal interface ISymmetricCryptoService : IProgressReportable, IDisposable
+    public interface ISymmetricCryptoService : IProgressReportable, IDisposable
     {
         /// <summary>
         /// Key size for the cryptographic algorithm used, in bytes.
@@ -17,7 +17,7 @@ namespace NCryptor.Crypto
         /// <summary>
         /// Initialization Vector size for the cryptographic algorithm used, in bytes.
         /// </summary>
-        int IVSizeInBytes { get; }
+        int IvSizeInBytes { get; }
 
         /// <summary>
         /// Asynchronously encrypts the input stream starting from the current position and writes the cipher to the output stream starting from the current position.

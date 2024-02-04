@@ -7,20 +7,20 @@ namespace NCryptor.Forms
     /// <summary>
     /// Collects the required information from the UI and validates them before proceeding to the encryption.
     /// </summary>
-    internal class EncryptWindow : OpWindow
+    public class EncryptWindow : OpWindow
     {
         public EncryptWindow() : base()
         {
-            Text = "Encrypt Files";
+            Text = @"Encrypt Files";
         }
 
-        protected override void Btn_BrowseFiles_OnClick(object sender, EventArgs e)
+        protected override void Btn_BrowseFiles_OnClick(object? sender, EventArgs e)
         {
             using (var ofd = new OpenFileDialog()){
                 ofd.CheckFileExists = true;
                 ofd.CheckPathExists = true;
-                ofd.Title = "Select files to encrypt";
-                ofd.Filter = "All files (*.*)|*.*";
+                ofd.Title = @"Select files to encrypt";
+                ofd.Filter = @"All files (*.*)|*.*";
                 ofd.Multiselect = true;
 
                 if(ofd.ShowDialog() == DialogResult.OK)
@@ -39,17 +39,17 @@ namespace NCryptor.Forms
             {
                 var factory = new ServiceFactory();
                 var handler = factory.CreateFileQueueHandler();
-                var progressWindow = factory.CreateStatusWindow(handler, tokenSource, "Encrypting");
+                var progressWindow = factory.CreateStatusWindow(handler, tokenSource, @"Encrypting");
 
                 progressWindow.Shown += StatusWindow_OnShow;
                 progressWindow.FormClosed += StatusWindow_OnClose;
 
                 progressWindow.Show();
-                await handler.EncryptTheFilesAsync(_filePaths, _outputDir, byteKey, tokenSource.Token);
+                await handler.EncryptTheFilesAsync(FilePaths, OutputDirectory, byteKey, tokenSource.Token);
             }
             catch(Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

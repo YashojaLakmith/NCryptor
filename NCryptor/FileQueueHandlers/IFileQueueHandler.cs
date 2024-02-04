@@ -5,7 +5,7 @@ namespace NCryptor.FileQueueHandlers
     /// <summary>
     /// Provides methods for moderating the processing of file list to be encrypted or decrypted.
     /// </summary>
-    internal interface IFileQueueHandler : IFileQueueEvents, IDisposable
+    public interface IFileQueueHandler : IFileQueueEvents, IDisposable
     {
         /// <summary>
         /// Asynchronously moderates the encryption of files.

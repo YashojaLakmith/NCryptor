@@ -6,63 +6,67 @@ namespace NCryptor.Forms
     /// <summary>
     /// Abstract base class for collecting information, validating and proceeding to the encryption and decryption process.
     /// </summary>
-    internal abstract partial class OpWindow : Form
+    public abstract partial class OpWindow : Form
     {
-        protected string _outputDir;
-        protected List<string> _filePaths;
+        protected string OutputDirectory;
+        protected List<string> FilePaths;
 
-        public OpWindow()
+        protected OpWindow()
         {
-            _filePaths = new List<string>();
-            _outputDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            FilePaths = [];
+            OutputDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             InitializeComponent();
 
-            textbox_OutputDir.Text = _outputDir;
+            textbox_OutputDir.Text = OutputDirectory;
             textbox_OutputDir.TextChanged += Textbox_OutputDirectory_OnTextChange;
             btn_Start.Click += Btn_Start_OnClick;
         }
 
-        private void Btn_BrowseOutputDirectory_OnClick(object sender, EventArgs e)
+        private void Btn_BrowseOutputDirectory_OnClick(object? sender, EventArgs e)
         {
             using (var fbd = new FolderBrowserDialog())
             {
-                fbd.Description = "Select the directory to output files.";
+                fbd.Description = @"Select the directory to output files.";
                 fbd.ShowNewFolderButton = true;
-                fbd.SelectedPath = _outputDir;
+                fbd.SelectedPath = OutputDirectory;
 
                 if(fbd.ShowDialog() == DialogResult.OK)
                 {
-                    _outputDir = fbd.SelectedPath;
-                    textbox_OutputDir.Text = _outputDir;
+                    OutputDirectory = fbd.SelectedPath;
+                    textbox_OutputDir.Text = OutputDirectory;
                 }
             }
             ValidateStartButton();
         }
 
-        private void Textbox_OutputDirectory_OnTextChange(object sender, EventArgs e)
+        private void Textbox_OutputDirectory_OnTextChange(object? sender, EventArgs e)
         {
-            _outputDir = textbox_OutputDir.Text;
+            OutputDirectory = textbox_OutputDir.Text;
         }
 
-        private async void Btn_Start_OnClick(object sender, EventArgs e)
+        private async void Btn_Start_OnClick(object? sender, EventArgs e)
         {
-            if(_outputDir == string.Empty)
+            if(OutputDirectory == string.Empty)
             {
-                var location = Assembly.GetExecutingAssembly().Location;
-                _outputDir = Path.GetDirectoryName(location);
-                textbox_OutputDir.Text = _outputDir;
+                OutputDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                textbox_OutputDir.Text = OutputDirectory;
             }
 
-            if (_filePaths.Count < 1)
+            if (FilePaths.Count < 1)
             {
-                MessageBox.Show("Select one or more files to continue", "Eror", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(@"Select one or more files to continue", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             else if (!IsValidKey())
             {
-                MessageBox.Show("The key:\n-Must be equal of higher than 6 characters.\n-Must be equal or less than 14 character\n-Can contain alphanumeric charcters and !@#$%^&"
-                                , "Invalid key"
+                MessageBox.Show("""
+                                The key:
+                                    -Must be equal of higher than 6 characters.
+                                    -Must be equal or less than 14 character.
+                                    -Can contain alphanumeric characters and !@#$%^&
+                                """
+                    , @"Invalid key"
                                 , MessageBoxButtons.OK
                                 , MessageBoxIcon.Error);
                 return;
@@ -74,13 +78,13 @@ namespace NCryptor.Forms
             }
             catch (Exception)
             {
-                MessageBox.Show($"Unable to create directory {_outputDir}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($@"Unable to create directory {OutputDirectory}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             
             if (!EvaluateAccessRules())
             {
-                MessageBox.Show($"Do not have enough access permissions at {_outputDir}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($@"Do not have enough access permissions at {OutputDirectory}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -89,55 +93,49 @@ namespace NCryptor.Forms
 
         protected abstract Task BeginTaskAsync();
 
-        protected abstract void Btn_BrowseFiles_OnClick(object sender, EventArgs e);
+        protected abstract void Btn_BrowseFiles_OnClick(object? sender, EventArgs e);
 
-        private void Btn_Clear_OnClick(object sender, EventArgs e)
+        private void Btn_Clear_OnClick(object? sender, EventArgs e)
         {
             listBox_SelectedFiles.Items.Clear();
-            _filePaths.Clear();
+            FilePaths.Clear();
             ValidateStartButton();
         }
 
-        private void Btn_Remove_OnClick(object sender, EventArgs e)
+        private void Btn_Remove_OnClick(object? sender, EventArgs e)
         {
             var selected = listBox_SelectedFiles.SelectedItems;
-            foreach (string s in selected.OfType<string>().ToList())
+            foreach (var s in selected.OfType<string>().ToList())
             {
-                _filePaths.Remove(s);
+                FilePaths.Remove(s);
                 listBox_SelectedFiles.Items.Remove(s);
             }
             ValidateStartButton();
         }
 
-        protected void StatusWindow_OnShow(object sender, EventArgs e)
-        {
-            Hide();
-        }
+        protected void StatusWindow_OnShow(object? sender, EventArgs e)
+            => Hide();
 
-        protected void StatusWindow_OnClose(object sender, EventArgs e)
-        {
-            Show();
-        }
+        protected void StatusWindow_OnClose(object? sender, EventArgs e)
+            => Show();
 
-        protected void AddToListBox(string[] paths)
+        protected void AddToListBox(IEnumerable<string> paths)
         {
-            _filePaths = paths.Union(_filePaths).ToList();
+            FilePaths = paths.Union(FilePaths).ToList();
 
             listBox_SelectedFiles.Items.Clear();
-            listBox_SelectedFiles.Items.AddRange(_filePaths.ToArray());
+            listBox_SelectedFiles.Items.AddRange(FilePaths.ToArray());
             ValidateStartButton();
         }
 
-        private void TextBox_Key_OnTextChanged(object sender, EventArgs e)
-        {
-            ValidateStartButton();
-        }
+        private void TextBox_Key_OnTextChanged(object? sender, EventArgs e)
+            => ValidateStartButton();
 
         private void CreateDirectoryIfNotExists()
         {
-            if (!Directory.Exists(_outputDir))
+            if (!Directory.Exists(OutputDirectory))
             {
-                Directory.CreateDirectory(_outputDir);
+                Directory.CreateDirectory(OutputDirectory);
             }
         }
 
@@ -146,7 +144,7 @@ namespace NCryptor.Forms
         {
             //bool writeAllow = false;
             //bool writeDeny = false;
-            //var controlList = Directory.GetAccessControl(_outputDir);Directory.
+            //var controlList = Directory.GetAccessControl(OutputDirectory);Directory.
 
             //if (controlList is null)
             //{
@@ -181,16 +179,16 @@ namespace NCryptor.Forms
 
         private bool IsValidKey()
         {
-            const string PATTERN = @"^[a-zA-Z0-9!@#$%^&]{6,14}$";
+            const string pattern = @"^[a-zA-Z0-9!@#$%^&]{6,14}$";
 
-            return Regex.IsMatch(textBox_Key.Text, PATTERN);
+            return Regex.IsMatch(textBox_Key.Text, pattern);
         }
 
         protected void ValidateStartButton()
         {
-            bool status = true;
+            var status = true;
 
-            status &= (_filePaths.Count > 0);
+            status &= (FilePaths.Count > 0);
             status &= IsValidKey();
 
             btn_Start.Enabled = status;

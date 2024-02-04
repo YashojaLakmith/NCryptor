@@ -1,6 +1,6 @@
 ﻿namespace NCryptor.Streams
 {
-    internal interface IFileStreamFactory
+    public interface IFileStreamFactory
     {
         FileStream CreateFileStream(string filePath, FileMode fileMode, FileAccess access, FileShare fileShare);
         FileStream CreateReadFileStream(string filePath);

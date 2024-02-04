@@ -5,7 +5,7 @@ namespace NCryptor.Events
     /// <summary>
     /// Provides capability to publish the finish of a task along with the reason.
     /// </summary>
-    internal interface ITaskFinishedReasonReportable
+    public interface ITaskFinishedReasonReportable
     {
         /// <summary>
         /// Raised when a task is finished.
