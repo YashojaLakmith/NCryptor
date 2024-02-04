@@ -35,7 +35,11 @@ namespace NCryptor.Crypto
             while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BufferSize, cancellationToken)) > 0)
             {
                 var progress = CalculateProgress(inputStream.Position, inputStream.Length);
-                ReportProgressIfHigherThanPreviousReported(ref previousReportedProgress, progress);
+                if (progress > previousReportedProgress)
+                {
+                    PublishProgressPercentage(new ProgressPercentageReportedEventArgs(progress));
+                    previousReportedProgress = progress;
+                }
 
                 await cs.WriteAsync(buffer, 0, bytesRead, cancellationToken);
             }
@@ -59,7 +63,11 @@ namespace NCryptor.Crypto
             while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BufferSize, cancellationToken)) > 0)
             {
                 var progress = CalculateProgress(inputStream.Position, inputStream.Length);
-                ReportProgressIfHigherThanPreviousReported(ref previousReportedProgress, progress);
+                if (progress > previousReportedProgress)
+                {
+                    PublishProgressPercentage(new ProgressPercentageReportedEventArgs(progress));
+                    previousReportedProgress = progress;
+                }
 
                 await cs.WriteAsync(buffer, 0, bytesRead, cancellationToken);
             }
@@ -73,13 +81,6 @@ namespace NCryptor.Crypto
 
         private static int CalculateProgress(long currentPosition, long length)
             => (int) Math.Round((double) currentPosition / length* 100);
-
-        private void ReportProgressIfHigherThanPreviousReported(ref int previousValue, int newValue)
-        {
-            if (previousValue >= newValue) return;
-            PublishProgressPercentage(new ProgressPercentageReportedEventArgs(newValue));
-            previousValue = newValue;
-        }
 
         protected virtual void Dispose(bool disposing)
         {
