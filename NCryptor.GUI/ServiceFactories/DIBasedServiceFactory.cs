@@ -29,10 +29,9 @@ namespace NCryptor.GUI.Factories
             return _serviceProvider.GetRequiredService<EncryptWindow>();
         }
 
-        public IFileQueueHandler CreateFileQueueHandler(IEnumerable<string> fileList, string outputDirectory, byte[] key, CancellationToken cancellationToken)
+        public IFileQueueHandler CreateFileQueueHandler()
         {
-            var factory = _serviceProvider.GetRequiredService<Func<IEnumerable<string>, string, byte[], CancellationToken, IFileQueueHandler>>();
-            return factory(fileList, outputDirectory, key, cancellationToken);
+            return _serviceProvider.GetRequiredService<IFileQueueHandler>();
         }
 
         public MainWindow CreateMainWindow()

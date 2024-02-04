@@ -8,5 +8,15 @@ namespace NCryptor.GUI.Streams
         {
             return new FileStream(filePath, fileMode, access, fileShare);
         }
+
+        public FileStream CreateReadFileStream(string filePath)
+        {
+            return new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        }
+
+        public FileStream CreateWriteFileStream(string filePath)
+        {
+            return new FileStream(filePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
+        }
     }
 }

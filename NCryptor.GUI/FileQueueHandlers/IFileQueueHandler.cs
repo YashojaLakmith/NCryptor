@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using NCryptor.GUI.Events;
@@ -14,12 +16,12 @@ namespace NCryptor.GUI.FileQueueHandlers
         /// Asynchronously moderates the encryption of files.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the operation.</returns>
-        Task EncryptTheFilesAsync();
+        Task EncryptTheFilesAsync(IEnumerable<string> fileList, string outputDirectory, byte[] key, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asynchronously moderates the decryption of files.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the operation.</returns>
-        Task DecryptTheFilesAsync();
+        Task DecryptTheFilesAsync(IEnumerable<string> fileList, string outputDirectory, byte[] key, CancellationToken cancellationToken);
     }
 }

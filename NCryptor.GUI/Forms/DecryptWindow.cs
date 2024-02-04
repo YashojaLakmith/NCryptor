@@ -42,20 +42,20 @@ namespace NCryptor.GUI.Forms
 
         protected override async Task BeginTaskAsync()
         {
-            var tokenSource = new CancellationTokenSource();
             var bKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
+            var tokenSource = new CancellationTokenSource();
             try
             {
                 var factory = new ServiceFactory();
 
-                var handler = factory.CreateFileQueueHandler(_filePaths, _outputDir, bKey, tokenSource.Token);
+                var handler = factory.CreateFileQueueHandler();
                 var progressWindow = factory.CreateStatusWindow(handler, tokenSource, "Decrypting");
 
                 progressWindow.Shown += StatusWindow_OnShow;
                 progressWindow.FormClosed += StatusWindow_OnClose;
 
                 progressWindow.Show();
-                await handler.DecryptTheFilesAsync();
+                await handler.DecryptTheFilesAsync(_filePaths, _outputDir, bKey, tokenSource.Token);
             }
             catch (Exception ex)
             {

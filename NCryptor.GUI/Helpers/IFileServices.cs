@@ -3,8 +3,7 @@
     internal interface IFileServices
     {
         bool CheckFileExistance(string filePath);
-        void DeleteFile(string filePath);
-        string ChangeOutputFileNameIfExists(string filePath);
+        void DeleteFileIfExists(string filePath);
         string CreateEncryptedFilePath(string originalPath, string outputDirectory);
         string CreateDecryptedFilePath(string originalPath, string outputDirectory);
     }

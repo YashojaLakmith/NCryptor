@@ -224,7 +224,7 @@
     <Compile Include="ServiceFactories\DIBasedServiceFactory.cs" />
     <Compile Include="ServiceFactories\IServiceFactory.cs" />
     <Compile Include="ServiceFactories\ServiceFactory.cs" />
-    <Compile Include="FileQueueHandlers\FileQueueHandler.cs" />
+    <Compile Include="FileQueueHandlers\FileQueueHandlerImpl.cs" />
     <Compile Include="Forms\DecryptWindow.cs">
       <SubType>Form</SubType>
     </Compile>

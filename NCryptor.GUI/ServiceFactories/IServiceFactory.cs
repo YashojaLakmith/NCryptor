@@ -12,7 +12,7 @@ namespace NCryptor.GUI.Factories
         MainWindow CreateMainWindow();
         EncryptWindow CreateEncryptWindow();
         DecryptWindow CreateDecryptWindow();
-        IFileQueueHandler CreateFileQueueHandler(IEnumerable<string> fileList, string outputDirectory, byte[] key, CancellationToken cancellationToken);
+        IFileQueueHandler CreateFileQueueHandler();
         StatusWindow CreateStatusWindow(IFileQueueEvents fileQueueEvents, CancellationTokenSource tokenSource, string title);
     }
 }

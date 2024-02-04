@@ -92,7 +92,7 @@ namespace NCryptor.GUI
                     services.AddSingleton<IMetadataHandler, MetadataHandlerImpl>();
 
                     services.AddTransient<ISymmetricCryptoService, SymmetricCryptoService>();
-                    services.AddSingleton<IFileQueueHandler, FileQueueHandler>();
+                    services.AddTransient<IFileQueueHandler, FileQueueHandlerImpl>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<EncryptWindow>();
                     services.AddTransient<DecryptWindow>();
@@ -111,18 +111,6 @@ namespace NCryptor.GUI
                             (events, tokeSource, title) =>
                             {
                                 return new StatusWindow(events, tokeSource, title);
-                            });
-                    services.AddTransient<Func<IEnumerable<string>, string, byte[], CancellationToken, IFileQueueHandler>>(
-                        container =>
-                            (filePaths, outputDirectory, key, cancellationToken) =>
-                            {
-                                var cryptoService = container.GetRequiredService<ISymmetricCryptoService>();
-                                var metadataHandler = container.GetRequiredService<IMetadataHandler>();
-                                var streamFactory = container.GetRequiredService<IFileStreamFactory>();
-                                var fileServices = container.GetRequiredService<IFileServices>();
-                                var keyServices = container.GetRequiredService<IKeyDerivationServices>();
-
-                                return new FileQueueHandler(cryptoService, metadataHandler, streamFactory, fileServices, keyServices, filePaths, outputDirectory, key, cancellationToken);
                             });
                 });
         }

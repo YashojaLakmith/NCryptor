@@ -26,9 +26,9 @@ namespace NCryptor.GUI.Factories
             return _provider.CreateEncryptWindow();
         }
 
-        public IFileQueueHandler CreateFileQueueHandler(IEnumerable<string> fileList, string outputDirectory, byte[] key, CancellationToken cancellationToken)
+        public IFileQueueHandler CreateFileQueueHandler()
         {
-            return _provider.CreateFileQueueHandler(fileList, outputDirectory, key, cancellationToken);
+            return _provider.CreateFileQueueHandler();
         }
 
         public MainWindow CreateMainWindow()
