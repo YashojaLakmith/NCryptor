@@ -1,4 +1,6 @@
-﻿namespace NCryptor.GUI.Events
+﻿using NCryptor.Events.EventArguments;
+
+namespace NCryptor.Events
 {
     /// <summary>
     /// Provides log event raising.

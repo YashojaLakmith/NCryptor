@@ -1,6 +1,6 @@
-﻿using NCryptor.GUI.Factories;
+﻿using NCryptor.ServiceFactories;
 
-namespace NCryptor.GUI.Forms
+namespace NCryptor.Forms
 {
     /// <summary>
     /// Starter form.

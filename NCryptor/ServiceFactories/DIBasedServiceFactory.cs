@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-using NCryptor.GUI.Events;
-using NCryptor.GUI.FileQueueHandlers;
-using NCryptor.GUI.Forms;
+using NCryptor.Events;
+using NCryptor.FileQueueHandlers;
+using NCryptor.Forms;
 
-namespace NCryptor.GUI.Factories
+namespace NCryptor.ServiceFactories
 {
     internal class DIBasedServiceFactory : IServiceFactory
     {

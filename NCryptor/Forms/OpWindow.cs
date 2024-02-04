@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace NCryptor.GUI.Forms
+namespace NCryptor.Forms
 {
     /// <summary>
     /// Abstract base class for collecting information, validating and proceeding to the encryption and decryption process.

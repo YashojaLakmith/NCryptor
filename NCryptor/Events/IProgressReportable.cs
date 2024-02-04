@@ -1,7 +1,9 @@
-﻿namespace NCryptor.GUI.Events
+﻿using NCryptor.Events.EventArguments;
+
+namespace NCryptor.Events
 {
     /// <summary>
-    /// Provides capability to publish the progress precentage of a task.
+    /// Provides capability to publish the progress percentage of a task.
     /// </summary>
     internal interface IProgressReportable
     {

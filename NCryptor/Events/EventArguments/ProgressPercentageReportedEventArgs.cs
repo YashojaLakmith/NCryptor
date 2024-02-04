@@ -1,4 +1,4 @@
-﻿namespace NCryptor.GUI.Events
+﻿namespace NCryptor.Events.EventArguments
 {
     /// <summary>
     /// Represents event data for the progress percentage.

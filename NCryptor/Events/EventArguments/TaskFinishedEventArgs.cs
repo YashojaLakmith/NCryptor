@@ -1,4 +1,4 @@
-﻿namespace NCryptor.GUI.Events
+﻿namespace NCryptor.Events.EventArguments
 {
     /// <summary>
     /// Represents the event data for reason of finishing of a task.

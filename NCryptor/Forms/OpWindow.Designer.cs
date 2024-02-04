@@ -1,4 +1,4 @@
-﻿namespace NCryptor.GUI.Forms
+﻿namespace NCryptor.Forms
 {
     partial class OpWindow
     {

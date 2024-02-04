@@ -1,4 +1,6 @@
-﻿namespace NCryptor.GUI.Events
+﻿using NCryptor.Events.EventArguments;
+
+namespace NCryptor.Events
 {
     /// <summary>
     /// Provides capability to publish the index of the processing file out of all files.
@@ -8,6 +10,6 @@
         /// <summary>
         /// Raised when index of the currently processing file is published.
         /// </summary>
-        event EventHandler<ProcessingFileCountEventArgs> ProcessingFileCountReported;
+        event EventHandler<ProcessingFileCountEventArgs> ProcessingFileIndexReported;
     }
 }

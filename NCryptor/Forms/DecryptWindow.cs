@@ -1,9 +1,9 @@
 ﻿using System.Text;
 
-using NCryptor.GUI.Factories;
-using NCryptor.GUI.Options;
+using NCryptor.ServiceFactories;
+using NCryptor.Options;
 
-namespace NCryptor.GUI.Forms
+namespace NCryptor.Forms
 {
     /// <summary>
     /// Collects the necessary information with UI and validates the before proceeding to the decryption.

@@ -1,4 +1,4 @@
-﻿namespace NCryptor.GUI.Metadata
+﻿namespace NCryptor.Metadata
 {
     internal interface IMetadataHandler
     {

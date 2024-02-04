@@ -1,4 +1,4 @@
-﻿namespace NCryptor.GUI.Events
+﻿namespace NCryptor.Events.EventArguments
 {
     /// <summary>
     /// Represents event data for the index of current file index and total number of files.
@@ -6,7 +6,7 @@
     internal class ProcessingFileCountEventArgs : EventArgs
     {
         public int TotalFiles { get; }
-        public int CurrentFile {  get; }
+        public int CurrentFile { get; }
 
         public ProcessingFileCountEventArgs(int total, int current)
         {

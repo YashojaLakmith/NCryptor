@@ -1,4 +1,4 @@
-﻿namespace NCryptor.GUI.Options
+﻿namespace NCryptor.Options
 {
     internal class CryptographicOptions
     {

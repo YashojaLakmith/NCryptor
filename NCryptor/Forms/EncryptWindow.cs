@@ -1,8 +1,8 @@
 ﻿using System.Text;
 
-using NCryptor.GUI.Factories;
+using NCryptor.ServiceFactories;
 
-namespace NCryptor.GUI.Forms
+namespace NCryptor.Forms
 {
     /// <summary>
     /// Collects the required information from the UI and validates them before proceeding to the encryption.

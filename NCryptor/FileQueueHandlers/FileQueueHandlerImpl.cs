@@ -1,12 +1,13 @@
 ﻿using System.Diagnostics;
 
-using NCryptor.GUI.Crypto;
-using NCryptor.GUI.Events;
-using NCryptor.GUI.Helpers;
-using NCryptor.GUI.Metadata;
-using NCryptor.GUI.Streams;
+using NCryptor.Crypto;
+using NCryptor.Events;
+using NCryptor.Events.EventArguments;
+using NCryptor.Helpers;
+using NCryptor.Metadata;
+using NCryptor.Streams;
 
-namespace NCryptor.GUI.FileQueueHandlers
+namespace NCryptor.FileQueueHandlers
 {
     internal class FileQueueHandlerImpl : IFileQueueHandler
     {
@@ -17,10 +18,10 @@ namespace NCryptor.GUI.FileQueueHandlers
         private readonly IFileServices _fileServices;
         private readonly IKeyDerivationServices _keyDerivationService;
 
-        public event EventHandler<ProgressPercentageReportedEventArgs> ProgressPercentageReported;
-        public event EventHandler<LogEmittedEventArgs> LogEmitted;
-        public event EventHandler<ProcessingFileCountEventArgs> ProcessingFileCountReported;
-        public event EventHandler<TaskFinishedEventArgs> TaskFinished;
+        public event EventHandler<ProgressPercentageReportedEventArgs>? ProgressPercentageReported;
+        public event EventHandler<LogEmittedEventArgs>? LogEmitted;
+        public event EventHandler<ProcessingFileCountEventArgs>? ProcessingFileIndexReported;
+        public event EventHandler<TaskFinishedEventArgs>? TaskFinished;
 
         public FileQueueHandlerImpl(ISymmetricCryptoService cryptoService, IMetadataHandler metadataHandler, IFileStreamFactory streamFactory, IFileServices fileServices, IKeyDerivationServices keyDerivationServices)
         {
@@ -43,55 +44,49 @@ namespace NCryptor.GUI.FileQueueHandlers
             {
                 for (int i = 0; i < count; i++)
                 {
-                    ReportCurrentlyProcessingFileIndex(new ProcessingFileCountEventArgs(count, i + 1));
+                    PublishProcessingFileIndex(new ProcessingFileCountEventArgs(count, i + 1));
                     var currentFilePath = filePaths[i];
                     var outputFilePath = _fileServices.CreateEncryptedFilePath(currentFilePath, outputDirectory);
 
                     try
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-                        ReportProgressPercentage(new ProgressPercentageReportedEventArgs(0));
+                        PublishProgressPercentage(new ProgressPercentageReportedEventArgs(0));
 
                         if (!_fileServices.CheckFileExistance(currentFilePath))
                         {
-                            PublishALog(new LogEmittedEventArgs($"{currentFilePath} not found"));
+                            PublishLog(new LogEmittedEventArgs($"{currentFilePath} not found"));
                             continue;
                         }
 
-                        PublishALog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Encrypting {currentFilePath}"));
+                        PublishLog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Encrypting {currentFilePath}"));
 
-                        using (var fsIn = _streamFactory.CreateReadFileStream(currentFilePath))
-                        {
-                            using (var fsOut = _streamFactory.CreateWriteFileStream(outputFilePath))
-                            {
-                                byte[] iv = _keyDerivationService.GenerateRandomIV();
-                                byte[] salt = _keyDerivationService.GenerateRandomSalt();
-                                (var encryptionKey, var verificationTag) = _keyDerivationService.DeriveKeyAndVerificationTag(key, salt);
+                        using var fsIn = _streamFactory.CreateReadFileStream(currentFilePath);
+                        using var fsOut = _streamFactory.CreateWriteFileStream(outputFilePath);
+                        byte[] iv = _keyDerivationService.GenerateRandomIV();
+                        byte[] salt = _keyDerivationService.GenerateRandomSalt();
+                        (var encryptionKey, var verificationTag) = _keyDerivationService.DeriveKeyAndVerificationTag(key, salt);
 
-                                using (var metadata = NcryptorMetadata.Create(verificationTag, salt, iv))
-                                {
-                                    await _metadataHandler.WriteMetadataAsync(metadata, fsOut, cancellationToken);
-                                    await _cryptoService.EncryptAsync(fsIn, fsOut, encryptionKey, iv, cancellationToken);
-                                }
+                        using var metadata = NcryptorMetadata.Create(verificationTag, salt, iv);
+                        await _metadataHandler.WriteMetadataAsync(metadata, fsOut, cancellationToken);
+                        await _cryptoService.EncryptAsync(fsIn, fsOut, encryptionKey, iv, cancellationToken);
 
-                                PublishALog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Success"));
-                                Array.Clear(encryptionKey, 0, encryptionKey.Length);
-                            }
-                        }
+                        PublishLog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Success"));
+                        Array.Clear(encryptionKey, 0, encryptionKey.Length);
                     }
                     catch (OperationCanceledException)
                     {
                         timer.Stop();
 
-                        PublishALog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Operation cancelled by the user"));
-                        ReportTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.CancelledByUser));
+                        PublishLog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Operation cancelled by the user"));
+                        PublishTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.CancelledByUser));
                         _fileServices.DeleteFileIfExists(outputFilePath);
 
                         return;
                     }
                     catch (Exception ex)
                     {
-                        PublishALog(new LogEmittedEventArgs($"{ex.Message}"));
+                        PublishLog(new LogEmittedEventArgs($"{ex.Message}"));
                         _fileServices.DeleteFileIfExists(outputFilePath);
 
                         continue;
@@ -100,15 +95,15 @@ namespace NCryptor.GUI.FileQueueHandlers
             }
             catch (Exception ex)
             {
-                PublishALog(new LogEmittedEventArgs(ex.Message));
-                ReportTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.ErrorEncountered));
+                PublishLog(new LogEmittedEventArgs(ex.Message));
+                PublishTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.ErrorEncountered));
 
                 return;
             }
 
             timer.Stop();
-            ReportProgressPercentage(new ProgressPercentageReportedEventArgs(100));
-            ReportTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.RanToSuccess));
+            PublishProgressPercentage(new ProgressPercentageReportedEventArgs(100));
+            PublishTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.RanToSuccess));
         }
 
         public async Task DecryptTheFilesAsync(IEnumerable<string> fileList, string outputDirectory, byte[] key, CancellationToken cancellationToken)
@@ -121,58 +116,52 @@ namespace NCryptor.GUI.FileQueueHandlers
             {
                 for (int i = 0; i < count; i++)
                 {
-                    ReportCurrentlyProcessingFileIndex(new ProcessingFileCountEventArgs(count, i + 1));
+                    PublishProcessingFileIndex(new ProcessingFileCountEventArgs(count, i + 1));
                     var currentFilePath = filePaths[i];
                     var outputFilePath = _fileServices.CreateDecryptedFilePath(currentFilePath, outputDirectory);
 
                     try
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-                        ReportProgressPercentage(new ProgressPercentageReportedEventArgs(0));
+                        PublishProgressPercentage(new ProgressPercentageReportedEventArgs(0));
 
                         if (!_fileServices.CheckFileExistance(currentFilePath))
                         {
-                            PublishALog(new LogEmittedEventArgs($"{currentFilePath} not found"));
+                            PublishLog(new LogEmittedEventArgs($"{currentFilePath} not found"));
                             continue;
                         }
 
-                        PublishALog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Decrypting {currentFilePath}"));
+                        PublishLog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Decrypting {currentFilePath}"));
 
-                        using (var fsIn = _streamFactory.CreateReadFileStream(currentFilePath))
+                        await using var fsIn = _streamFactory.CreateReadFileStream(currentFilePath);
+                        using var metadata = await _metadataHandler.ReadMetadataAsync(fsIn, cancellationToken);
+                        var (decryptionKey, calculatedVerificationTag) = _keyDerivationService.DeriveKeyAndVerificationTag(key, metadata.Salt);
+
+                        if (!calculatedVerificationTag.SequenceEqual(metadata.VerificationTag))
                         {
-                            using (var metadata = await _metadataHandler.ReadMetadataAsync(fsIn, cancellationToken))
-                            {
-                                (var decryptionKey, var calculatedVerificationTag) = _keyDerivationService.DeriveKeyAndVerificationTag(key, metadata.Salt);
-
-                                if (!calculatedVerificationTag.SequenceEqual(metadata.VerificationTag))
-                                {
-                                    PublishALog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Incorrect key."));
-                                    continue;
-                                }
-
-                                using (var fsOut = _streamFactory.CreateWriteFileStream(outputFilePath))
-                                {
-                                    await _cryptoService.DecryptAsync(fsIn, fsOut, decryptionKey, metadata.IV, cancellationToken);
-
-                                    PublishALog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Success"));
-                                    Array.Clear(decryptionKey, 0, decryptionKey.Length);
-                                }
-                            }
+                            PublishLog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Incorrect key."));
+                            continue;
                         }
+
+                        await using var fsOut = _streamFactory.CreateWriteFileStream(outputFilePath);
+                        await _cryptoService.DecryptAsync(fsIn, fsOut, decryptionKey, metadata.IV, cancellationToken);
+
+                        PublishLog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Success"));
+                        Array.Clear(decryptionKey, 0, decryptionKey.Length);
                     }
                     catch (OperationCanceledException)
                     {
                         timer.Stop();
 
-                        PublishALog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Operation cancelled by the user"));
-                        ReportTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.CancelledByUser));
+                        PublishLog(new LogEmittedEventArgs($"{timer.Elapsed:hh\\:mm\\:ss}: Operation cancelled by the user"));
+                        PublishTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.CancelledByUser));
                         _fileServices.DeleteFileIfExists(outputFilePath);
 
                         return;
                     }
                     catch (Exception ex)
                     {
-                        PublishALog(new LogEmittedEventArgs($"{ex.Message}"));
+                        PublishLog(new LogEmittedEventArgs($"{ex.Message}"));
                         _fileServices.DeleteFileIfExists(outputFilePath);
                         continue;
                     }
@@ -180,37 +169,37 @@ namespace NCryptor.GUI.FileQueueHandlers
             }
             catch(Exception ex)
             {
-                PublishALog(new LogEmittedEventArgs(ex.Message));
-                ReportTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.ErrorEncountered));
+                PublishLog(new LogEmittedEventArgs(ex.Message));
+                PublishTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.ErrorEncountered));
                 return;
             }
 
             timer.Stop();
-            ReportProgressPercentage(new ProgressPercentageReportedEventArgs(100));
-            ReportTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.RanToSuccess));
+            PublishProgressPercentage(new ProgressPercentageReportedEventArgs(100));
+            PublishTaskFinished(new TaskFinishedEventArgs(TaskFinishedDueTo.RanToSuccess));
         }
 
-        protected virtual void OnProgressReportedByCryptoService(object sender, ProgressPercentageReportedEventArgs e)
+        protected virtual void OnProgressReportedByCryptoService(object? sender, ProgressPercentageReportedEventArgs e)
         {
-            ReportProgressPercentage(e);
+            PublishProgressPercentage(e);
         }
 
-        public virtual void ReportProgressPercentage(ProgressPercentageReportedEventArgs e)
+        protected virtual void PublishProgressPercentage(ProgressPercentageReportedEventArgs e)
         {
             ProgressPercentageReported?.Invoke(this, e);
         }
 
-        public virtual void PublishALog(LogEmittedEventArgs e)
+        protected virtual void PublishLog(LogEmittedEventArgs e)
         {
             LogEmitted?.Invoke(this, e);
         }
 
-        public virtual void ReportCurrentlyProcessingFileIndex(ProcessingFileCountEventArgs e)
+        protected virtual void PublishProcessingFileIndex(ProcessingFileCountEventArgs e)
         {
-            ProcessingFileCountReported?.Invoke(this, e);
+            ProcessingFileIndexReported?.Invoke(this, e);
         }
 
-        public virtual void ReportTaskFinished(TaskFinishedEventArgs e)
+        protected virtual void PublishTaskFinished(TaskFinishedEventArgs e)
         {
             TaskFinished?.Invoke(this, e);
         }

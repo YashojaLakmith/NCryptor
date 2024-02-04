@@ -1,6 +1,6 @@
-﻿using NCryptor.GUI.Options;
+﻿using NCryptor.Options;
 
-namespace NCryptor.GUI.Helpers
+namespace NCryptor.Helpers
 {
     internal class FileServicesImpl : IFileServices
     {

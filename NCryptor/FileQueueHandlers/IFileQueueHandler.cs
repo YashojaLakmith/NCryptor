@@ -1,6 +1,6 @@
-﻿using NCryptor.GUI.Events;
+﻿using NCryptor.Events;
 
-namespace NCryptor.GUI.FileQueueHandlers
+namespace NCryptor.FileQueueHandlers
 {
     /// <summary>
     /// Provides methods for moderating the processing of file list to be encrypted or decrypted.

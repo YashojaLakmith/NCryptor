@@ -1,8 +1,7 @@
 ﻿using System.Security.Cryptography;
+using NCryptor.Events.EventArguments;
 
-using NCryptor.GUI.Events;
-
-namespace NCryptor.GUI.Crypto
+namespace NCryptor.Crypto
 {
     internal class SymmetricCryptoService : ISymmetricCryptoService
     {
@@ -27,26 +26,22 @@ namespace NCryptor.GUI.Crypto
             _alg.Key = key;
             _alg.IV = iv;
 
-            using (var decryptor = _alg.CreateDecryptor())
+            using var decryptor = _alg.CreateDecryptor();
+            using var cs = new CryptoStream(outputStream, decryptor, CryptoStreamMode.Write);
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int bytesRead;
+            int previousReportedProgress = 0;
+
+            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BUFFER_SIZE, cancellationToken)) > 0)
             {
-                using (var cs = new CryptoStream(outputStream, decryptor, CryptoStreamMode.Write))
-                {
-                    byte[] buffer = new byte[BUFFER_SIZE];
-                    int bytesRead;
-                    int previousReportedProgress = 0;
+                int progress = CalculateProgress(inputStream.Position, inputStream.Length);
+                ReportProgressIfHigherThanPreviousReported(ref previousReportedProgress, progress);
 
-                    while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BUFFER_SIZE, cancellationToken)) > 0)
-                    {
-                        int progress = CalculateProgress(inputStream.Position, inputStream.Length);
-                        ReportProgressIfHigherThanPreviousReported(ref previousReportedProgress, progress);
-
-                        await cs.WriteAsync(buffer, 0, bytesRead, cancellationToken);
-                    }
-
-                    cs.FlushFinalBlock();
-                    Array.Clear(buffer, 0, BUFFER_SIZE);
-                }
+                await cs.WriteAsync(buffer, 0, bytesRead, cancellationToken);
             }
+
+            await cs.FlushFinalBlockAsync(cancellationToken);
+            Array.Clear(buffer, 0, BUFFER_SIZE);
         }
 
         public async Task EncryptAsync(Stream inputStream, Stream outputStream, byte[] key, byte[] iv, CancellationToken cancellationToken = default)
@@ -55,26 +50,22 @@ namespace NCryptor.GUI.Crypto
             _alg.Key = key;
             _alg.IV = iv;
 
-            using (var encryptor = _alg.CreateEncryptor())
+            using var encryptor = _alg.CreateEncryptor();
+            using var cs = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write);
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int bytesRead;
+            int previousReportedProgress = 0;
+
+            while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BUFFER_SIZE, cancellationToken)) > 0)
             {
-                using (var cs = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write))
-                {
-                    byte[] buffer = new byte[BUFFER_SIZE];
-                    int bytesRead;
-                    int previousReportedProgress = 0;
+                int progress = CalculateProgress(inputStream.Position, inputStream.Length);
+                ReportProgressIfHigherThanPreviousReported(ref previousReportedProgress, progress);
 
-                    while ((bytesRead = await inputStream.ReadAsync(buffer, 0, BUFFER_SIZE, cancellationToken)) > 0)
-                    {
-                        int progress = CalculateProgress(inputStream.Position, inputStream.Length);
-                        ReportProgressIfHigherThanPreviousReported(ref previousReportedProgress, progress);
-
-                        await cs.WriteAsync(buffer, 0, bytesRead, cancellationToken);
-                    }
-
-                    cs.FlushFinalBlock();
-                    Array.Clear(buffer, 0, BUFFER_SIZE);
-                }
+                await cs.WriteAsync(buffer, 0, bytesRead, cancellationToken);
             }
+
+            await cs.FlushFinalBlockAsync(cancellationToken);
+            Array.Clear(buffer, 0, BUFFER_SIZE);
         }
 
         public virtual void ReportProgressPercentage(ProgressPercentageReportedEventArgs e)

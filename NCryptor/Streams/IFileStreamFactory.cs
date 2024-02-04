@@ -1,4 +1,4 @@
-﻿namespace NCryptor.GUI.Streams
+﻿namespace NCryptor.Streams
 {
     internal interface IFileStreamFactory
     {

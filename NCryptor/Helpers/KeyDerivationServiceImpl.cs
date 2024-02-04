@@ -1,9 +1,9 @@
 ﻿using System.Security.Cryptography;
 
-using NCryptor.GUI.Crypto;
-using NCryptor.GUI.Options;
+using NCryptor.Crypto;
+using NCryptor.Options;
 
-namespace NCryptor.GUI.Helpers
+namespace NCryptor.Helpers
 {
     internal class KeyDerivationServiceImpl : IKeyDerivationServices
     {
@@ -18,45 +18,36 @@ namespace NCryptor.GUI.Helpers
 
         public (byte[], byte[]) DeriveKeyAndVerificationTag(byte[] password, byte[] salt)
         {
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, _options.KeyDerivationIterations, HashAlgorithmName.SHA512))
+            byte[] key = Rfc2898DeriveBytes.Pbkdf2(password, salt, _options.KeyDerivationIterations, HashAlgorithmName.SHA512, _cryptoService.KeySizeInBytes);
+            byte[] keyPart = key.Skip(key.Length / 2).ToArray();
+            byte[] tag;
+            byte[] tagPart;
+
+            using (var hash = SHA512.Create())
             {
-                byte[] key = pbkdf2.GetBytes(_cryptoService.KeySizeInBytes);
-                byte[] keyPart = key.Skip(key.Length / 2).ToArray();
-                byte[] tag;
-                byte[] tagPart;
-
-                using(var hash = SHA512.Create())
-                {
-                    tag = hash.ComputeHash(keyPart);
-                    tagPart = tag.Take(_options.VerificationTagLength).ToArray();
-                }
-
-                Array.Clear(keyPart, 0, keyPart.Length);
-                Array.Clear(tag, 0, tag.Length);
-                
-                return (key, tagPart);
+                tag = hash.ComputeHash(keyPart);
+                tagPart = tag.Take(_options.VerificationTagLength).ToArray();
             }
+
+            Array.Clear(keyPart, 0, keyPart.Length);
+            Array.Clear(tag, 0, tag.Length);
+
+            return (key, tagPart);
         }
 
         public byte[] GenerateRandomBytes(int length)
         {
-            var bytes = new byte[length];
-            using(var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(bytes);
-
-                return bytes;
-            }
+            return RandomNumberGenerator.GetBytes(length);
         }
 
         public byte[] GenerateRandomIV()
         {
-            return GenerateRandomBytes(_cryptoService.IVSizeInBytes);
+            return RandomNumberGenerator.GetBytes(_cryptoService.IVSizeInBytes);
         }
 
         public byte[] GenerateRandomSalt()
         {
-            return GenerateRandomBytes(_options.SaltLength);
+            return RandomNumberGenerator.GetBytes(_options.SaltLength);
         }
     }
 }

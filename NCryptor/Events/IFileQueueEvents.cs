@@ -1,6 +1,6 @@
-﻿using NCryptor.GUI.FileQueueHandlers;
+﻿using NCryptor.FileQueueHandlers;
 
-namespace NCryptor.GUI.Events
+namespace NCryptor.Events
 {
     /// <summary>
     /// Contains the events that can be raised from <see cref="IFileQueueHandler"/>.

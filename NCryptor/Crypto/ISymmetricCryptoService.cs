@@ -1,8 +1,8 @@
 ﻿using System.Security.Cryptography;
 
-using NCryptor.GUI.Events;
+using NCryptor.Events;
 
-namespace NCryptor.GUI.Crypto
+namespace NCryptor.Crypto
 {
     /// <summary>
     /// Provides methods for asynchronously encrypting and decrypting streams.

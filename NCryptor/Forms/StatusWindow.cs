@@ -1,6 +1,7 @@
-﻿using NCryptor.GUI.Events;
+﻿using NCryptor.Events;
+using NCryptor.Events.EventArguments;
 
-namespace NCryptor.GUI.Forms
+namespace NCryptor.Forms
 {
     /// <summary>
     /// Represents the form for communicating the progress of the operation.
@@ -20,7 +21,7 @@ namespace NCryptor.GUI.Forms
             FormClosing += OnCloseButtonClick;
             _events.TaskFinished += OnTaskFinished;
             _events.LogEmitted += OnLogReported;
-            _events.ProcessingFileCountReported += OnFileCountReported;
+            _events.ProcessingFileIndexReported += OnFileIndexReported;
             _events.ProgressPercentageReported += OnProgressReported;
             
 
@@ -46,7 +47,7 @@ namespace NCryptor.GUI.Forms
             btn_Cancel.Enabled = false;
         }
 
-        private void OnFileCountReported(object sender, ProcessingFileCountEventArgs e)
+        private void OnFileIndexReported(object sender, ProcessingFileCountEventArgs e)
         {
             label_Status.Text = $"File {e.CurrentFile} of {e.TotalFiles}";
         }

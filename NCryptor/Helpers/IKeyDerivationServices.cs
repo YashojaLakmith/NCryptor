@@ -1,4 +1,4 @@
-﻿namespace NCryptor.GUI.Helpers
+﻿namespace NCryptor.Helpers
 {
     internal interface IKeyDerivationServices
     {
