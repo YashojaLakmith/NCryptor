@@ -8,11 +8,11 @@ namespace NCryptor.Forms
     /// <summary>
     /// Collects the necessary information with UI and validates the before proceeding to the decryption.
     /// </summary>
-    public class DecryptWindow : OpWindow
+    public class DecryptDataCollectionWindow : BaseDataCollectionWindow
     {
         private readonly FileSystemOptions _fileSystemOptions;
 
-        public DecryptWindow(FileSystemOptions fileSystemOptions) : base()
+        public DecryptDataCollectionWindow(FileSystemOptions fileSystemOptions) : base()
         {
             _fileSystemOptions = fileSystemOptions;
             Text = @"Decrypt Files";
@@ -39,28 +39,29 @@ namespace NCryptor.Forms
         protected override async Task BeginTaskAsync()
         {
             var bKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
-            var tokenSource = new CancellationTokenSource();
+            TokenSource = new CancellationTokenSource();
             try
             {
                 var factory = new ServiceFactory();
 
                 var handler = factory.CreateFileQueueHandler();
-                var progressWindow = factory.CreateStatusWindow(handler, tokenSource, "Decrypting");
+                var statusWindow = factory.CreateDecryptStatusWindow();
 
-                progressWindow.Shown += StatusWindow_OnShow;
-                progressWindow.FormClosed += StatusWindow_OnClose;
+                statusWindow.Shown += StatusWindow_OnShow;
+                statusWindow.FormClosed += StatusWindow_OnClose;
+                statusWindow.CancellationSignalled += OnCancellationSignalled;
 
-                progressWindow.Show();
-                await handler.DecryptTheFilesAsync(FilePaths, OutputDirectory, bKey, tokenSource.Token);
+                statusWindow.Show();
+                await handler.DecryptTheFilesAsync(FilePaths, OutputDirectory, bKey, TokenSource.Token);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                tokenSource.Dispose();
-                Array.Clear(bKey, 0, bKey.Length);
+                TokenSource.Dispose();
+                Array.Clear(bKey);
             }
         }
     }

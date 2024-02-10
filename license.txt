@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) __2023__ __Yashoja Lakmith__
+Copyright (c) __2024__ __Yashoja Lakmith__
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

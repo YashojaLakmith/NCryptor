@@ -1,11 +1,9 @@
-﻿using NCryptor.Events;
-
-namespace NCryptor.FileQueueHandlers
+﻿namespace NCryptor.TaskModerators
 {
     /// <summary>
     /// Provides methods for moderating the processing of file list to be encrypted or decrypted.
     /// </summary>
-    public interface IFileQueueHandler : IFileQueueEvents, IDisposable
+    public interface ITaskModerator : IDisposable
     {
         /// <summary>
         /// Asynchronously moderates the encryption of files.

@@ -7,28 +7,25 @@ namespace NCryptor.Helpers
 {
     public class KeyDerivationServiceImpl : IKeyDerivationServices
     {
-        private readonly ISymmetricCryptoService _cryptoService;
-        private readonly CryptographicOptions _options;
+        private readonly KeyDerivationOptions _keyDerivationOptions;
+        private readonly ICryptographicOptions _cryptographicOptions;
 
-        public KeyDerivationServiceImpl(ISymmetricCryptoService cryptoService, CryptographicOptions options)
+        public KeyDerivationServiceImpl(ICryptographicOptions cryptographicOptions, KeyDerivationOptions keyDerivationOptions)
         {
-            _cryptoService = cryptoService;
-            _options = options;
+            _cryptographicOptions = cryptographicOptions;
+            _keyDerivationOptions = keyDerivationOptions;
         }
 
         public (byte[], byte[]) DeriveKeyAndVerificationTag(byte[] password, byte[] salt)
         {
-            var key = Rfc2898DeriveBytes.Pbkdf2(password, salt, _options.KeyDerivationIterations, HashAlgorithmName.SHA512, _cryptoService.KeySizeInBytes);
+            var key = Rfc2898DeriveBytes.Pbkdf2(password, salt, _keyDerivationOptions.KeyDerivationIterations, HashAlgorithmName.SHA512, _cryptographicOptions.KeyByteSize);
             var keyPart = key.Skip(key.Length / 2).ToArray();
-            byte[] tag;
-            byte[] tagPart;
 
-            using var hash = SHA512.Create();
-            tag = hash.ComputeHash(keyPart);
-            tagPart = tag.Take(_options.VerificationTagLength).ToArray();
+            var tag = SHA512.HashData(keyPart);
+            var tagPart = tag.Take(_keyDerivationOptions.VerificationTagLength).ToArray();
 
-            Array.Clear(keyPart, 0, keyPart.Length);
-            Array.Clear(tag, 0, tag.Length);
+            Array.Clear(keyPart);
+            Array.Clear(tag);
 
             return (key, tagPart);
         }
@@ -37,9 +34,9 @@ namespace NCryptor.Helpers
             => RandomNumberGenerator.GetBytes(length);
 
         public byte[] GenerateRandomIv()
-            => RandomNumberGenerator.GetBytes(_cryptoService.IvSizeInBytes);
+            => RandomNumberGenerator.GetBytes(_cryptographicOptions.IvByteSize);
 
         public byte[] GenerateRandomSalt()
-            => RandomNumberGenerator.GetBytes(_options.SaltLength);
+            => RandomNumberGenerator.GetBytes(_keyDerivationOptions.SaltLength);
     }
 }

@@ -1,24 +1,15 @@
 ﻿using System.Security.Cryptography;
 
 using NCryptor.Events;
+using NCryptor.Options;
 
 namespace NCryptor.Crypto
 {
     /// <summary>
     /// Provides methods for asynchronously encrypting and decrypting streams.
     /// </summary>
-    public interface ISymmetricCryptoService : IProgressReportable, IDisposable
+    public interface ISymmetricCryptoService : ICryptographicOptions, IDisposable
     {
-        /// <summary>
-        /// Key size for the cryptographic algorithm used, in bytes.
-        /// </summary>
-        int KeySizeInBytes { get; }
-
-        /// <summary>
-        /// Initialization Vector size for the cryptographic algorithm used, in bytes.
-        /// </summary>
-        int IvSizeInBytes { get; }
-
         /// <summary>
         /// Asynchronously encrypts the input stream starting from the current position and writes the cipher to the output stream starting from the current position.
         /// </summary>

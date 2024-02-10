@@ -1,6 +1,6 @@
 ﻿namespace NCryptor.Forms
 {
-    partial class OpWindow
+    partial class BaseDataCollectionWindow
     {
         /// <summary>
         /// Required designer variable.

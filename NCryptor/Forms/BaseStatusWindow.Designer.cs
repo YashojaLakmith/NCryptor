@@ -2,7 +2,7 @@
 
 namespace NCryptor.Forms
 {
-    partial class StatusWindow
+    partial class BaseStatusWindow
     {
         /// <summary>
         /// Required designer variable.

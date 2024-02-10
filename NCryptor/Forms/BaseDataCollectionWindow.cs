@@ -6,12 +6,13 @@ namespace NCryptor.Forms
     /// <summary>
     /// Abstract base class for collecting information, validating and proceeding to the encryption and decryption process.
     /// </summary>
-    public abstract partial class OpWindow : Form
+    public abstract partial class BaseDataCollectionWindow : Form
     {
         protected string OutputDirectory;
         protected List<string> FilePaths;
+        protected CancellationTokenSource TokenSource;
 
-        protected OpWindow()
+        protected BaseDataCollectionWindow()
         {
             FilePaths = [];
             OutputDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -192,6 +193,11 @@ namespace NCryptor.Forms
             status &= IsValidKey();
 
             btn_Start.Enabled = status;
+        }
+
+        protected async void OnCancellationSignalled(object? sender, EventArgs e)
+        {
+            await TokenSource.CancelAsync();
         }
     }
 }

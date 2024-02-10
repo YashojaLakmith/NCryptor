@@ -7,9 +7,9 @@ namespace NCryptor.Forms
     /// <summary>
     /// Collects the required information from the UI and validates them before proceeding to the encryption.
     /// </summary>
-    public class EncryptWindow : OpWindow
+    public class EncryptDataCollectionWindow : BaseDataCollectionWindow
     {
-        public EncryptWindow() : base()
+        public EncryptDataCollectionWindow() : base()
         {
             Text = @"Encrypt Files";
         }
@@ -34,18 +34,19 @@ namespace NCryptor.Forms
         protected override async Task BeginTaskAsync()
         {
             var byteKey = Encoding.ASCII.GetBytes(textBox_Key.Text);
-            var tokenSource = new CancellationTokenSource();
+            TokenSource = new CancellationTokenSource();
             try
             {
                 var factory = new ServiceFactory();
                 var handler = factory.CreateFileQueueHandler();
-                var progressWindow = factory.CreateStatusWindow(handler, tokenSource, @"Encrypting");
+                var statusWindow = factory.CreateEncryptStatusWindow();
 
-                progressWindow.Shown += StatusWindow_OnShow;
-                progressWindow.FormClosed += StatusWindow_OnClose;
+                statusWindow.Shown += StatusWindow_OnShow;
+                statusWindow.FormClosed += StatusWindow_OnClose;
+                statusWindow.CancellationSignalled += OnCancellationSignalled;
 
-                progressWindow.Show();
-                await handler.EncryptTheFilesAsync(FilePaths, OutputDirectory, byteKey, tokenSource.Token);
+                statusWindow.Show();
+                await handler.EncryptTheFilesAsync(FilePaths, OutputDirectory, byteKey, TokenSource.Token);
             }
             catch(Exception ex)
             {
@@ -53,8 +54,8 @@ namespace NCryptor.Forms
             }
             finally
             {
-                Array.Clear(byteKey, 0, byteKey.Length);
-                tokenSource.Dispose();
+                Array.Clear(byteKey);
+                TokenSource.Dispose();
             }
         }
     }

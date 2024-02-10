@@ -5,40 +5,51 @@
         public async Task<NcryptorMetadata> ReadMetadataAsync(Stream sourceStream, CancellationToken cancellationToken = default)
         {
             sourceStream.Position = 0;
-            var lengthBytes = new byte[4];
+            var sectionData = await CreateSectionArray(sourceStream, cancellationToken);
 
-            await sourceStream.ReadAsync(lengthBytes, 0, 4, cancellationToken);
-            var saltSize = BitConverter.ToInt32(lengthBytes, 0);
-            var salt = new byte[saltSize];
-            await sourceStream.ReadAsync(salt, 0, saltSize, cancellationToken);
-
-            await sourceStream.ReadAsync(lengthBytes, 0, 4, cancellationToken);
-            var verificationTagSize = BitConverter.ToInt32(lengthBytes, 0);
-            var verificationTag = new byte[verificationTagSize];
-            await sourceStream.ReadAsync(verificationTag, 0, verificationTagSize, cancellationToken);
-
-            await sourceStream.ReadAsync(lengthBytes, 0, 4, cancellationToken);
-            var ivSize = BitConverter.ToInt32(lengthBytes, 0);
-            var iv = new byte[ivSize];
-            await sourceStream.ReadAsync(iv, 0, ivSize, cancellationToken);
-
-            return NcryptorMetadata.Create(verificationTag, salt, iv);
+            return NcryptorMetadata.Create(sectionData[0], sectionData[1], sectionData[2]);
         }
 
         public async Task WriteMetadataAsync(NcryptorMetadata metadata, Stream targetStream, CancellationToken cancellationToken = default)
         {
-            var saltLengthBytes = BitConverter.GetBytes(metadata.Salt.Length);
-            var tagLengthBytes = BitConverter.GetBytes(metadata.VerificationTag.Length);
-            var ivLengthBytes = BitConverter.GetBytes(metadata.IV.Length);
+            targetStream.Position = 0;
+            await WriteBufferAsync(targetStream, metadata.Salt, cancellationToken);
+            await WriteBufferAsync(targetStream, metadata.VerificationTag, cancellationToken);
+            await WriteBufferAsync(targetStream, metadata.IV, cancellationToken);
+        }
 
-            await targetStream.WriteAsync(saltLengthBytes, 0, saltLengthBytes.Length, cancellationToken);
-            await targetStream.WriteAsync(metadata.Salt, 0, metadata.Salt.Length, cancellationToken);
+        private static async Task<byte[][]> CreateSectionArray(Stream source, CancellationToken cancellationToken = default)
+        {
+            const int sectionCount = 3;
+            var sectionData = new byte[sectionCount][];
 
-            await targetStream.WriteAsync(tagLengthBytes, 0, tagLengthBytes.Length, cancellationToken);
-            await targetStream.WriteAsync(metadata.VerificationTag, 0, metadata.VerificationTag.Length, cancellationToken);
+            for (var i = 0; i < sectionCount; i++)
+            {
+                sectionData[i] = await ReadSectionAsync(source, cancellationToken);
+            }
 
-            await targetStream.WriteAsync(ivLengthBytes, 0, ivLengthBytes.Length, cancellationToken);
-            await targetStream.WriteAsync(metadata.IV, 0, metadata.IV.Length, cancellationToken);
+            return sectionData;
+        }
+
+        private static async Task<byte[]> ReadSectionAsync(Stream source, CancellationToken cancellationToken = default)
+        {
+            const int intLengthInBytes = 4;
+            var bufferSizeInBytes = new byte[intLengthInBytes];
+
+            await source.ReadAsync(bufferSizeInBytes, 0, intLengthInBytes, cancellationToken);
+            var bufferSize = BitConverter.ToInt32(bufferSizeInBytes);
+            var buffer = new byte[bufferSize];
+            await source.ReadExactlyAsync(buffer, 0, bufferSize, cancellationToken);
+
+            return buffer;
+        }
+
+        private static async Task WriteBufferAsync(Stream target, byte[] buffer, CancellationToken cancellationToken = default)
+        {
+            var bufferLengthInBytes = BitConverter.GetBytes(buffer.Length);
+
+            await target.WriteAsync(bufferLengthInBytes, 0, bufferLengthInBytes.Length, cancellationToken);
+            await target.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
         }
     }
 }

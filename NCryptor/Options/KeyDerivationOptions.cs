@@ -1,6 +1,6 @@
 ﻿namespace NCryptor.Options
 {
-    public class CryptographicOptions
+    public class KeyDerivationOptions
     {
         public virtual int KeyDerivationIterations { get; } = 100000;
         public virtual int VerificationTagLength { get; } = 64;

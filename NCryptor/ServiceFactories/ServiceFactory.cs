@@ -1,5 +1,4 @@
-﻿using NCryptor.Events;
-using NCryptor.FileQueueHandlers;
+﻿using NCryptor.TaskModerators;
 using NCryptor.Forms;
 
 namespace NCryptor.ServiceFactories
@@ -11,19 +10,22 @@ namespace NCryptor.ServiceFactories
         public static void SetProvider(IServiceFactory provider)
             => _provider = provider;
 
-        public DecryptWindow CreateDecryptWindow()
+        public DecryptDataCollectionWindow CreateDecryptWindow()
             => _provider.CreateDecryptWindow();
 
-        public EncryptWindow CreateEncryptWindow()
+        public EncryptDataCollectionWindow CreateEncryptWindow()
             => _provider.CreateEncryptWindow();
 
-        public IFileQueueHandler CreateFileQueueHandler()
+        public ITaskModerator CreateFileQueueHandler()
             => _provider.CreateFileQueueHandler();
+
+        public EncryptStatusWindow CreateEncryptStatusWindow()
+            => _provider.CreateEncryptStatusWindow();
+
+        public DecryptStatusWindow CreateDecryptStatusWindow()
+            => _provider.CreateDecryptStatusWindow();
 
         public MainWindow CreateMainWindow()
             => _provider.CreateMainWindow();
-
-        public StatusWindow CreateStatusWindow(IFileQueueEvents fileQueueEvents, CancellationTokenSource tokenSource, string title)
-            => _provider.CreateStatusWindow(fileQueueEvents, tokenSource, title);
     }
 }

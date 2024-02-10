@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-using NCryptor.Events;
-using NCryptor.FileQueueHandlers;
+using NCryptor.TaskModerators;
 using NCryptor.Forms;
 
 namespace NCryptor.ServiceFactories
@@ -13,22 +12,22 @@ namespace NCryptor.ServiceFactories
         public DIBasedServiceFactory(IServiceProvider serviceProvider)
             => _serviceProvider = serviceProvider;
 
-        public DecryptWindow CreateDecryptWindow()
-            => _serviceProvider.GetRequiredService<DecryptWindow>();
+        public DecryptDataCollectionWindow CreateDecryptWindow()
+            => _serviceProvider.GetRequiredService<DecryptDataCollectionWindow>();
 
-        public EncryptWindow CreateEncryptWindow()
-            => _serviceProvider.GetRequiredService<EncryptWindow>();
+        public EncryptDataCollectionWindow CreateEncryptWindow()
+            => _serviceProvider.GetRequiredService<EncryptDataCollectionWindow>();
 
-        public IFileQueueHandler CreateFileQueueHandler()
-            => _serviceProvider.GetRequiredService<IFileQueueHandler>();
+        public ITaskModerator CreateFileQueueHandler()
+            => _serviceProvider.GetRequiredService<ITaskModerator>();
+
+        public EncryptStatusWindow CreateEncryptStatusWindow()
+            => _serviceProvider.GetRequiredService<EncryptStatusWindow>();
+
+        public DecryptStatusWindow CreateDecryptStatusWindow()
+            => _serviceProvider.GetRequiredService<DecryptStatusWindow>();
 
         public MainWindow CreateMainWindow()
             => _serviceProvider.GetRequiredService<MainWindow>();
-
-        public StatusWindow CreateStatusWindow(IFileQueueEvents fileQueueEvents, CancellationTokenSource tokenSource, string title)
-        {
-            var factory = _serviceProvider.GetRequiredService<Func<IFileQueueEvents, CancellationTokenSource, string, StatusWindow>>();
-            return factory(fileQueueEvents, tokenSource, title);
-        }
     }
 }

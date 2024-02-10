@@ -6,30 +6,34 @@ namespace NCryptor.Forms
     /// <summary>
     /// Represents the form for communicating the progress of the operation.
     /// </summary>
-    public partial class StatusWindow : Form
+    public abstract partial class BaseStatusWindow : Form
     {
-        private readonly IFileQueueEvents _events;
-        private readonly CancellationTokenSource _cancellationTokenSource;
         private bool _isInProgress;
+        private readonly IProgressReportEventService _progressEventService;
+        private readonly IProcessingFileIndexEventService _processingFileEventService;
+        private readonly ILogEventService _logEventService;
+        private readonly ITaskFinishedEventService _taskFinishedEventService;
 
-        public StatusWindow(IFileQueueEvents fileQueueEvents, CancellationTokenSource tokenSource, string title)
+        public event EventHandler? CancellationSignalled;
+
+        public BaseStatusWindow(IProgressReportEventService progressReportEventService, IProcessingFileIndexEventService processingFileIndexService, ILogEventService logEventService, ITaskFinishedEventService taskFinishedEventService)
         {
-            _events = fileQueueEvents;
-            _cancellationTokenSource = tokenSource;
             _isInProgress = true;
+            _progressEventService = progressReportEventService;
+            _processingFileEventService = processingFileIndexService;
+            _logEventService = logEventService;
+            _taskFinishedEventService = taskFinishedEventService;
 
             FormClosing += OnCloseButtonClick;
-            _events.TaskFinished += OnTaskFinished;
-            _events.LogEmitted += OnLogReported;
-            _events.ProcessingFileIndexReported += OnFileIndexReported;
-            _events.ProgressPercentageReported += OnProgressReported;
-            
+            _taskFinishedEventService.TaskFinished += OnTaskFinished;
+            _logEventService.LogEmitted += OnLogReported;
+            _processingFileEventService.ProcessingFileIndexReported += OnFileIndexReported;
+            _progressEventService.ProgressPercentageReported += OnProgressReported;
 
             InitializeComponent();
 
             label_Status.Text = string.Empty;
             listbox_Log.HorizontalScrollbar = true;
-            Text = title;
         }
 
         private void OnProgressReported(object? sender, ProgressPercentageReportedEventArgs e)
@@ -61,7 +65,7 @@ namespace NCryptor.Forms
 
             if (e.CloseReason != CloseReason.UserClosing)
             {
-                _cancellationTokenSource.Cancel();
+                PublishCancellationSignalled();
                 _isInProgress = false;
                 return;
             }
@@ -69,7 +73,7 @@ namespace NCryptor.Forms
             var result = MessageBox.Show(@"Cancel current operation?", @"Confirmation", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             if (result == DialogResult.OK)
             {
-                _cancellationTokenSource.Cancel();
+                PublishCancellationSignalled();
                 _isInProgress = false;
             }
             else
@@ -83,9 +87,14 @@ namespace NCryptor.Forms
             var result = MessageBox.Show(@"Cancel current operation?", @"Confirmation", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             if (result != DialogResult.OK) return;
 
-            _cancellationTokenSource.Cancel();
+            PublishCancellationSignalled();
             btn_Cancel.Enabled = false;
             _isInProgress = false;
+        }
+
+        protected virtual void PublishCancellationSignalled()
+        {
+            CancellationSignalled?.Invoke(this, EventArgs.Empty);
         }
     }
 }
