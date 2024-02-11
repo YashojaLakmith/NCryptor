@@ -9,8 +9,9 @@ namespace NCryptor.ServiceFactories
         MainWindow CreateMainWindow();
         EncryptDataCollectionWindow CreateEncryptWindow();
         DecryptDataCollectionWindow CreateDecryptWindow();
-        ITaskModerator CreateFileQueueHandler();
         EncryptStatusWindow CreateEncryptStatusWindow();
         DecryptStatusWindow CreateDecryptStatusWindow();
+        IEncryptTaskModerator CreateEncryptTaskModerator(ManualModeratorParameters moderatorParameters);
+        IDecryptTaskModerator CreateDecryptTaskModerator(ManualModeratorParameters moderatorParameters);
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Text;
 
 using NCryptor.ServiceFactories;
+using NCryptor.TaskModerators;
+using NCryptor.Validations;
 
 namespace NCryptor.Forms
 {
@@ -9,7 +11,7 @@ namespace NCryptor.Forms
     /// </summary>
     public class EncryptDataCollectionWindow : BaseDataCollectionWindow
     {
-        public EncryptDataCollectionWindow() : base()
+        public EncryptDataCollectionWindow(IInputValidations inputValidations) : base(inputValidations)
         {
             Text = @"Encrypt Files";
         }
@@ -37,8 +39,15 @@ namespace NCryptor.Forms
             TokenSource = new CancellationTokenSource();
             try
             {
+                var parameters = new ManualModeratorParameters()
+                {
+                    FilePathCollection = FilePaths,
+                    OutputDirectory = OutputDirectory,
+                    UserKey = byteKey,
+                    CancellationToken = TokenSource.Token
+                };
                 var factory = new ServiceFactory();
-                var handler = factory.CreateFileQueueHandler();
+                var moderator = factory.CreateEncryptTaskModerator(parameters);
                 var statusWindow = factory.CreateEncryptStatusWindow();
 
                 statusWindow.Shown += StatusWindow_OnShow;
@@ -46,7 +55,7 @@ namespace NCryptor.Forms
                 statusWindow.CancellationSignalled += OnCancellationSignalled;
 
                 statusWindow.Show();
-                await handler.EncryptTheFilesAsync(FilePaths, OutputDirectory, byteKey, TokenSource.Token);
+                await moderator.ModerateFileEncryptionAsync();
             }
             catch(Exception ex)
             {

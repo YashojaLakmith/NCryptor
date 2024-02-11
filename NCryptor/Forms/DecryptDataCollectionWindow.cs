@@ -2,6 +2,8 @@
 
 using NCryptor.ServiceFactories;
 using NCryptor.Options;
+using NCryptor.TaskModerators;
+using NCryptor.Validations;
 
 namespace NCryptor.Forms
 {
@@ -12,7 +14,7 @@ namespace NCryptor.Forms
     {
         private readonly FileSystemOptions _fileSystemOptions;
 
-        public DecryptDataCollectionWindow(FileSystemOptions fileSystemOptions) : base()
+        public DecryptDataCollectionWindow(FileSystemOptions fileSystemOptions, IInputValidations inputValidations) : base(inputValidations)
         {
             _fileSystemOptions = fileSystemOptions;
             Text = @"Decrypt Files";
@@ -42,9 +44,16 @@ namespace NCryptor.Forms
             TokenSource = new CancellationTokenSource();
             try
             {
+                var parameters = new ManualModeratorParameters()
+                {
+                    FilePathCollection = FilePaths,
+                    OutputDirectory = OutputDirectory,
+                    UserKey = bKey,
+                    CancellationToken = TokenSource.Token
+                };
                 var factory = new ServiceFactory();
 
-                var handler = factory.CreateFileQueueHandler();
+                var moderator = factory.CreateDecryptTaskModerator(parameters);
                 var statusWindow = factory.CreateDecryptStatusWindow();
 
                 statusWindow.Shown += StatusWindow_OnShow;
@@ -52,7 +61,7 @@ namespace NCryptor.Forms
                 statusWindow.CancellationSignalled += OnCancellationSignalled;
 
                 statusWindow.Show();
-                await handler.DecryptTheFilesAsync(FilePaths, OutputDirectory, bKey, TokenSource.Token);
+                await moderator.ModerateFileDecryptionAsync();
             }
             catch (Exception ex)
             {

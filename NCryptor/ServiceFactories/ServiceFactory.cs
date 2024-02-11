@@ -16,9 +16,6 @@ namespace NCryptor.ServiceFactories
         public EncryptDataCollectionWindow CreateEncryptWindow()
             => _provider.CreateEncryptWindow();
 
-        public ITaskModerator CreateFileQueueHandler()
-            => _provider.CreateFileQueueHandler();
-
         public EncryptStatusWindow CreateEncryptStatusWindow()
             => _provider.CreateEncryptStatusWindow();
 
@@ -27,5 +24,11 @@ namespace NCryptor.ServiceFactories
 
         public MainWindow CreateMainWindow()
             => _provider.CreateMainWindow();
+
+        public IEncryptTaskModerator CreateEncryptTaskModerator(ManualModeratorParameters moderatorParameters)
+            => _provider.CreateEncryptTaskModerator(moderatorParameters);
+
+        public IDecryptTaskModerator CreateDecryptTaskModerator(ManualModeratorParameters moderatorParameters)
+            => _provider.CreateDecryptTaskModerator(moderatorParameters);
     }
 }

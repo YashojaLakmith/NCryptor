@@ -14,8 +14,7 @@ using NCryptor.Helpers;
 using NCryptor.Metadata;
 using NCryptor.Options;
 using NCryptor.Streams;
-
-#pragma warning disable CA1416
+using NCryptor.Validations;
 
 namespace NCryptor
 {
@@ -129,18 +128,44 @@ namespace NCryptor
                 services.AddSingleton<IFileServices, FileServicesImpl>();
                 services.AddSingleton<IFileStreamFactory, FileStreamFactoryImpl>();
                 services.AddSingleton<IMetadataHandler, MetadataHandlerImpl>();
+                services.AddSingleton<IInputValidations, InputValidationsImpl>();
                 services.AddSingleton<KeyDerivationOptions>();
                 services.AddSingleton<FileSystemOptions>();
 
                 services.AddTransient<ISymmetricCryptoService, SymmetricCryptoServiceImpl>();
                 services.AddTransient<IKeyDerivationServices, KeyDerivationServiceImpl>();
-                services.AddTransient<ITaskModerator, TaskModeratorImpl>();
                 services.AddTransient<ITaskModeratorEventService, TaskModeratorEventServiceImpl>();
                 services.AddTransient<MainWindow>();
                 services.AddTransient<EncryptDataCollectionWindow>();
                 services.AddTransient<DecryptDataCollectionWindow>();
                 services.AddTransient<EncryptStatusWindow>();
                 services.AddTransient<DecryptStatusWindow>();
+                services.AddTransient<Func<ManualModeratorParameters, IEncryptTaskModerator>>(
+                    container =>
+                        parameters =>
+                        {
+                            var cryptoService = container.GetRequiredService<ISymmetricCryptoService>();
+                            var metadataHandler = container.GetRequiredService<IMetadataHandler>();
+                            var streamFactory = container.GetRequiredService<IFileStreamFactory>();
+                            var fileServices = container.GetRequiredService<IFileServices>();
+                            var keyServices = container.GetRequiredService<IKeyDerivationServices>();
+                            var eventServices = container.GetRequiredService<ITaskModeratorEventService>();
+
+                            return new EncryptTaskModeratorImpl(cryptoService, metadataHandler, streamFactory, fileServices, keyServices, eventServices, parameters);
+                        });
+                services.AddTransient<Func<ManualModeratorParameters, IDecryptTaskModerator>>(
+                    container =>
+                        parameters =>
+                        {
+                            var cryptoService = container.GetRequiredService<ISymmetricCryptoService>();
+                            var metadataHandler = container.GetRequiredService<IMetadataHandler>();
+                            var streamFactory = container.GetRequiredService<IFileStreamFactory>();
+                            var fileServices = container.GetRequiredService<IFileServices>();
+                            var keyServices = container.GetRequiredService<IKeyDerivationServices>();
+                            var eventServices = container.GetRequiredService<ITaskModeratorEventService>();
+
+                            return new DecryptTaskModeratorImpl(cryptoService, metadataHandler, streamFactory, fileServices, keyServices, eventServices, parameters);
+                        });
                 services.AddTransient<ICryptographicOptions>(
                     container => container.GetRequiredService<ISymmetricCryptoService>());
                 services.AddTransient<SymmetricAlgorithm>(

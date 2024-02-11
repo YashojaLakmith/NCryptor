@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 
+using NCryptor.Validations;
+
 namespace NCryptor.Forms
 {
     /// <summary>
@@ -9,13 +11,15 @@ namespace NCryptor.Forms
     public abstract partial class BaseDataCollectionWindow : Form
     {
         protected string OutputDirectory;
+        private readonly IInputValidations _inputValidations;
         protected List<string> FilePaths;
         protected CancellationTokenSource TokenSource;
 
-        protected BaseDataCollectionWindow()
+        protected BaseDataCollectionWindow(IInputValidations inputValidations)
         {
             FilePaths = [];
             OutputDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            _inputValidations = inputValidations;
 
             InitializeComponent();
 
@@ -47,49 +51,10 @@ namespace NCryptor.Forms
         }
 
         private async void Btn_Start_OnClick(object? sender, EventArgs e)
-        {
-            if(OutputDirectory == string.Empty)
-            {
-                OutputDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                textbox_OutputDir.Text = OutputDirectory;
-            }
-
-            if (FilePaths.Count < 1)
-            {
-                MessageBox.Show(@"Select one or more files to continue", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            else if (!IsValidKey())
-            {
-                MessageBox.Show("""
-                                The key:
-                                    -Must be equal of higher than 6 characters.
-                                    -Must be equal or less than 14 character.
-                                    -Can contain alphanumeric characters and !@#$%^&
-                                """
-                    , @"Invalid key"
-                                , MessageBoxButtons.OK
-                                , MessageBoxIcon.Error);
-                return;
-            }
-
-            try
-            {
-                CreateDirectoryIfNotExists();
-            }
-            catch (Exception)
-            {
-                MessageBox.Show($@"Unable to create directory {OutputDirectory}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            
-            if (!EvaluateAccessRules())
-            {
-                MessageBox.Show($@"Do not have enough access permissions at {OutputDirectory}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
+        {         
             await BeginTaskAsync();
+
+            textBox_Key.Text = string.Empty;
         }
 
         protected abstract Task BeginTaskAsync();
@@ -132,65 +97,12 @@ namespace NCryptor.Forms
         private void TextBox_Key_OnTextChanged(object? sender, EventArgs e)
             => ValidateStartButton();
 
-        private void CreateDirectoryIfNotExists()
-        {
-            if (!Directory.Exists(OutputDirectory))
-            {
-                Directory.CreateDirectory(OutputDirectory);
-            }
-        }
-
-        /// <returns><c>true</c> if has directory access rules for modifying. Otherwise <c>false</c></returns>
-        private bool EvaluateAccessRules()
-        {
-            //bool writeAllow = false;
-            //bool writeDeny = false;
-            //var controlList = Directory.GetAccessControl(OutputDirectory);Directory.
-
-            //if (controlList is null)
-            //{
-            //    return false;
-            //}
-
-            //var rules = controlList.GetAccessRules(true, true, typeof(SecurityIdentifier));
-            //if (rules is null)
-            //{
-            //    return false;
-            //}
-
-            //foreach (FileSystemAccessRule rule in rules)
-            //{
-            //    if ((FileSystemRights.Write & rule.FileSystemRights) != FileSystemRights.Write)
-            //    {
-            //        if (AccessControlType.Allow == rule.AccessControlType)
-            //        {
-            //            writeAllow = true;
-            //        }
-            //        else if (AccessControlType.Deny == rule.AccessControlType)
-            //        {
-            //            writeDeny = true;
-            //        }
-            //        continue;
-            //    }
-            //}
-
-            //return writeAllow && !writeDeny;
-            return true;
-        }
-
-        private bool IsValidKey()
-        {
-            const string pattern = @"^[a-zA-Z0-9!@#$%^&]{6,14}$";
-
-            return Regex.IsMatch(textBox_Key.Text, pattern);
-        }
-
         protected void ValidateStartButton()
         {
             var status = true;
 
             status &= (FilePaths.Count > 0);
-            status &= IsValidKey();
+            status &= _inputValidations.IsValidPassword(textBox_Key.Text);
 
             btn_Start.Enabled = status;
         }
