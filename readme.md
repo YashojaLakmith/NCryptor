@@ -1,12 +1,14 @@
 # NCryptor
 
-NCryptor is a file encryption and decryption tool for Windows built using C# and WinForms which runs on .NET Framework 4.8. It provides an easy-to-use and straightforward graphical interface for encrypting and decrypting personal files using symmetric encryption algorithms.
+NCryptor is a file encryption and decryption tool for Windows built using C# and WinForms which targets .NET 8 It provides an easy-to-use and straightforward graphical interface for encrypting and decrypting personal files using symmetric encryption algorithms.
 
 ### Table of Contents
 - [Features](#features)
-- [Installation](#installation)
+- [Building](#building)
 - [Usage](#usage)
-- [Runtime Dependencies](#dependencies)
+- [Build Dependencies](#build-dependencies)
+- [Runtime Dependencies](#runtime-dependencies)
+- [Backwards Compatibility](#backwards-compatibility)
 - [Special Notes](#notes)
 - [License](#license)
 
@@ -16,17 +18,17 @@ NCryptor is a file encryption and decryption tool for Windows built using C# and
 - Simple and user-friendly interface with real-time logs.
 - Supports batch encryption and decryption of multiple files..
 - Detailed error logging for troubleshooting.
-- Can be easily modified to use any symmetric algorithm in the .NET Standard.
+- Can be easily modified to use any algorithm that derives from `SymmetricAlgorithm` class.
 
-<a name="installation"></a>
-## Installation
+<a name="building"></a>
+## Building
 
 - Clone the repository: `https://github.com/YashojaLakmith/NCryptor.git`.
-- Build the solution with `dotnet build` to generate the executable file.
+- Build the solution with `dotnet` as an either framework dependent or self-hosted application.
 
 <a name="usage"></a>
 ### Usage
-- Launch the NCryptor application using the .exe file.
+- Launch the NCryptor application.
 - Choose between encryption and decryption modes.
 - Select one or more files to process.
 - Select the directory to save completed files.
@@ -36,15 +38,22 @@ NCryptor is a file encryption and decryption tool for Windows built using C# and
 	- may contain alphanumeric charcters as well as _!@#$%^&*_
 - Click the _"Start"_ button to initiate the operation.
 
-<a name="dependencies"></a>
+<a name="build-dependencies"></a>
+### Build Dependencies
+- The application requires .NET 8 SDK to be present on the platform for build process.
+
+<a name="runtime-dependencies"></a>
 ### Runtime Dependencies
-- The application requires _.NET Framework 4.8_ to be available on the host.
-- The application requires _Microsoft C Runtime Library (msvcrt.dll)_ to be present on the host.
+- The application requires .NET 8 Runtime to be present on the platform if it was built as a framework dependent application.
+
+<a name="backwards-compatibility"></a>
+### Backwards Compatibility
+- It is not guaranteed that the application would be backwards compatible with the previous .NET versions.
 
 <a name="notes"></a>
 ### Special Notes
-- By default, the application implemets __Advanced Encryption Standard with 256bit key size, CBC mode and PKCS7 padding mode.__ However, this can be replaced with any algorithm which derives from `SymmetricAlgorithm` of your choice.
+- By default, the application uses __Advanced Encryption Standard with 256bit key size, CBC mode and PKCS7 padding mode.__ However, this can be replaced with any algorithm which derives from `SymmetricAlgorithm` of your choice.
 
 <a name="license"></a>
 ### License
-NCryptor is open-source software licensed under the [MIT License](license.md).
+NCryptor is open-source software licensed under the [MIT License](license.txt).
