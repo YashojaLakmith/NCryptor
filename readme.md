@@ -10,6 +10,7 @@ NCryptor is a file encryption and decryption tool for Windows built using C# and
 - [Runtime Dependencies](#runtime-dependencies)
 - [Backwards Compatibility](#backwards-compatibility)
 - [Special Notes](#notes)
+- [Change Encryption Algorithm](#modifying-algorithm)
 - [License](#license)
 
 <a name="features"></a>
@@ -52,7 +53,32 @@ NCryptor is a file encryption and decryption tool for Windows built using C# and
 
 <a name="notes"></a>
 ### Special Notes
-- By default, the application uses __Advanced Encryption Standard with 256bit key size, CBC mode and PKCS7 padding mode.__ However, this can be replaced with any algorithm which derives from `SymmetricAlgorithm` of your choice.
+- By default, the application uses __Advanced Encryption Standard with 256bit key size, CBC mode and PKCS7 padding mode.__ However, this can be [replaced](#modifying-algorithm) with any algorithm which derives from `SymmetricAlgorithm` of your choice.
+
+<a name="modifying-algorithm"></a>
+### Change Encryption Algorithm
+- Inject any algorithm that derives from `SymmetricAlgorithm` class using the `ConfigureServices` method in the `Program` class.
+_Example:_
+```csharp
+private static void ConfigureServices(IHostBuilder hostBuilder)
+{
+	hostBuilder.ConfigureServices((context, services) =>
+	{
+            // Other injected services
+
+            services.AddTransient<SymmetricAlgorithm>(
+                    container =>
+                    {
+                        var alg = Aes.Create();
+                        alg.KeySize = 256;
+                        alg.Mode = CipherMode.CBC;
+                        alg.Padding = PaddingMode.PKCS7;
+
+                        return alg;
+                    });
+	});
+}
+```
 
 <a name="license"></a>
 ### License
