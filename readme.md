@@ -57,26 +57,21 @@ NCryptor is a file encryption and decryption tool for Windows built using C# and
 
 <a name="modifying-algorithm"></a>
 ### Change Encryption Algorithm
-- Inject any algorithm that derives from `SymmetricAlgorithm` class using the `ConfigureServices` method in the `Program` class.
+Inject any algorithm that derives from `SymmetricAlgorithm` class using the `AddSymmetricAlgorithm` extension method in the `ServiceCollectionExtensions` class.
+
 _Example:_
 ```csharp
-private static void ConfigureServices(IHostBuilder hostBuilder)
+public static IServiceCollection AddSymmetricAlgorithm(this IServiceCollection services)
 {
-	hostBuilder.ConfigureServices((context, services) =>
-	{
-            // Other injected services
-
-            services.AddTransient<SymmetricAlgorithm>(
-                    container =>
-                    {
-                        var alg = Aes.Create();
-                        alg.KeySize = 256;
-                        alg.Mode = CipherMode.CBC;
-                        alg.Padding = PaddingMode.PKCS7;
-
-                        return alg;
-                    });
-	});
+    return services.AddTransient<SymmetricAlgorithm>(
+        _ =>
+        {
+            var aes = Aes.Create();
+            aes.KeySize = 256;
+            aes.Padding = PaddingMode.PKCS7;
+            aes.Mode = CipherMode.CBC;
+            return aes;
+        });
 }
 ```
 
