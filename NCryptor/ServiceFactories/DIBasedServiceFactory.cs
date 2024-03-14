@@ -5,6 +5,9 @@ using NCryptor.Forms;
 
 namespace NCryptor.ServiceFactories
 {
+    /// <summary>
+    /// Implemetaion of <see cref="IServiceFactory"/> backed by dependency injection container.
+    /// </summary>
     public class DIBasedServiceFactory : IServiceFactory
     {
         private readonly IServiceProvider _serviceProvider;

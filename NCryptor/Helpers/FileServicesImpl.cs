@@ -27,10 +27,10 @@ namespace NCryptor.Helpers
             var nameWithExt = Path.GetFileName(originalPath);
             var tempName = Path.Combine(outputDirectory, nameWithExt);
 
-            if(!CheckFileExistance($"{tempName}{_options.Extension}")) return $"{tempName}{_options.Extension}";
+            if(!CheckFileExistance($"{tempName}{_options.FileExtension}")) return $"{tempName}{_options.FileExtension}";
 
             tempName = RandomlyChangeFileName(tempName);
-            return $"{tempName}{_options.Extension}";
+            return $"{tempName}{_options.FileExtension}";
         }
 
         public void DeleteFileIfExists(string filePath)

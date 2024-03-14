@@ -38,10 +38,10 @@ namespace NCryptor.Events
             _logEvent.PublishALog(message);
         }
 
-        public void SuccessfulCompletionEvent()
+        public void SuccessfulSingleFileCompletionEvent()
         {
             var timeString = BuildTimeString();
-            var message = $"{timeString}: Success.";
+            var message = $"{timeString}: @Completed processing the file.";
 
             _logEvent.PublishALog(message);
             _progressReport.ProgressPublished(100);

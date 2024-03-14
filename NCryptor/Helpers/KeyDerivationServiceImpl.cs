@@ -18,7 +18,7 @@ namespace NCryptor.Helpers
 
         public (byte[], byte[]) DeriveKeyAndVerificationTag(byte[] password, byte[] salt)
         {
-            var key = Rfc2898DeriveBytes.Pbkdf2(password, salt, _keyDerivationOptions.KeyDerivationIterations, HashAlgorithmName.SHA512, _cryptographicOptions.KeyByteSize);
+            var key = Rfc2898DeriveBytes.Pbkdf2(password, salt, _keyDerivationOptions.KeyDerivationIterations, HashAlgorithmName.SHA512, _cryptographicOptions.ByteLengthOfKey);
             var keyPart = key.Skip(key.Length / 2).ToArray();
 
             var tag = SHA512.HashData(keyPart);
@@ -34,7 +34,7 @@ namespace NCryptor.Helpers
             => RandomNumberGenerator.GetBytes(length);
 
         public byte[] GenerateRandomIv()
-            => RandomNumberGenerator.GetBytes(_cryptographicOptions.IvByteSize);
+            => RandomNumberGenerator.GetBytes(_cryptographicOptions.ByteLengthOfIV);
 
         public byte[] GenerateRandomSalt()
             => RandomNumberGenerator.GetBytes(_keyDerivationOptions.SaltLength);
