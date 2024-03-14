@@ -12,6 +12,9 @@ namespace NCryptor.Events
         /// </summary>
         event EventHandler<ProgressPercentageReportedEventArgs> ProgressPercentageReported;
 
+        /// <summary>
+        /// Publishes an event with a percentage value which indicates the progress.
+        /// </summary>
         void ProgressPublished(int progressPercentage);
     }
 }

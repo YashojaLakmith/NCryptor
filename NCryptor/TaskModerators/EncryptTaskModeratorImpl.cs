@@ -78,7 +78,7 @@ namespace NCryptor.TaskModerators
 
                 _eventServices.BeginOfFileEncryptionEvent(inputFilePath, indexOfFile, _fileList.Count);
                 await TryEncryptInputFileAsync(inputFilePath, fullOutputPath);
-                _eventServices.SuccessfulCompletionEvent();
+                _eventServices.SuccessfulSingleFileCompletionEvent();
             }
             catch (OperationCanceledException)
             {

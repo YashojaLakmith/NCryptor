@@ -78,7 +78,7 @@ namespace NCryptor.TaskModerators
 
                 _eventServices.BeginOfFileDecryptionEvent(inputFilePath, indexOfFile, _fileList.Count);
                 await TryDecryptInputFile(inputFilePath, outputFilePath);
-                _eventServices.SuccessfulCompletionEvent();
+                _eventServices.SuccessfulSingleFileCompletionEvent();
             }
             catch (OperationCanceledException)
             {
@@ -107,7 +107,7 @@ namespace NCryptor.TaskModerators
             await using var fsOut = _streamFactory.CreateWriteFileStream(outputFilePath);
             await _cryptoService.DecryptAsync(fsIn, fsOut, decryptionKey, metadata.IV, _cancellationToken);
 
-            _eventServices.SuccessfulCompletionEvent();
+            _eventServices.SuccessfulSingleFileCompletionEvent();
             Array.Clear(decryptionKey);
         }
     }

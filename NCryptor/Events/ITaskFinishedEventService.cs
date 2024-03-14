@@ -12,6 +12,9 @@ namespace NCryptor.Events
         /// </summary>
         event EventHandler<TaskFinishedEventArgs> TaskFinished;
 
+        /// <summary>
+        /// Publishes an event to communicate that a task has finished along with the reason of finishing.
+        /// </summary>
         void PublishTaskFinished(TaskFinishedDueTo taskFinishedDueTo);
     }
 }

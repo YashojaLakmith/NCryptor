@@ -12,6 +12,9 @@ namespace NCryptor.Events
         /// </summary>
         event EventHandler<ProcessingFileCountEventArgs> ProcessingFileIndexReported;
 
+        /// <summary>
+        /// Publish an event with total files being processed an zero based index of the file being processed.
+        /// </summary>
         void PublishCurrentlyProcessingFileIndex(int zeroBasedIndex, int totalFiles);
     }
 }

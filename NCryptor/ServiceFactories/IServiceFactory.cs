@@ -1,9 +1,11 @@
-﻿using NCryptor.Events;
+﻿using NCryptor.Forms;
 using NCryptor.TaskModerators;
-using NCryptor.Forms;
 
 namespace NCryptor.ServiceFactories
 {
+    /// <summary>
+    /// Defines methods for creating various services that would not implicitely be resolved by the dependency injection container.
+    /// </summary>
     public interface IServiceFactory
     {
         MainWindow CreateMainWindow();

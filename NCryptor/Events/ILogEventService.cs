@@ -12,6 +12,9 @@ namespace NCryptor.Events
         /// </summary>
         event EventHandler<LogEmittedEventArgs> LogEmitted;
 
+        /// <summary>
+        /// Publishes a log event with given message.
+        /// </summary>
         void PublishALog(string message);
     }
 }

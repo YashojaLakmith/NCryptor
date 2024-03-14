@@ -12,8 +12,8 @@ namespace NCryptor.Crypto
             ;
         private const int BufferSize = 81920;
 
-        public int KeyByteSize => _alg.KeySize / 8;
-        public int IvByteSize => _alg.IV.Length;
+        public int ByteLengthOfKey => _alg.KeySize / 8;
+        public int ByteLengthOfIV => _alg.IV.Length;
 
         public SymmetricCryptoServiceImpl(SymmetricAlgorithm algorithm, IProgressReportEventService progressReportService)
         {

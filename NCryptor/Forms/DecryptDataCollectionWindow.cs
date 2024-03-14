@@ -27,7 +27,7 @@ namespace NCryptor.Forms
                 ofd.CheckFileExists = true;
                 ofd.CheckPathExists = true;
                 ofd.Title = @"Select files to encrypt";
-                ofd.Filter = $@"Encryptor files (*{_fileSystemOptions.Extension})|*{_fileSystemOptions.Extension}";
+                ofd.Filter = $@"Encryptor files (*{_fileSystemOptions.FileExtension})|*{_fileSystemOptions.FileExtension}";
                 ofd.Multiselect = true;
 
                 if (ofd.ShowDialog() == DialogResult.OK)
