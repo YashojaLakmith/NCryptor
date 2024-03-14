@@ -5,8 +5,8 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E8114D9D-0887-40FF-8C9A-F561228CCFD3}"
 	ProjectSection(SolutionItems) = preProject
-		readme.md = readme.md
 		license.txt = license.txt
+		readme.md = readme.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NCryptor", "NCryptor\NCryptor.csproj", "{CE99FCEA-563F-4291-BCA6-5F45F08B64DB}"

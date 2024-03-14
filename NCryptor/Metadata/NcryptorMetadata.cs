@@ -1,6 +1,6 @@
 ﻿namespace NCryptor.Metadata
 {
-    public class NcryptorMetadata : IDisposable
+    public class NcryptorMetadata : IDisposable, IEquatable<NcryptorMetadata>
     {
         private bool _disposedValue;
 
@@ -39,5 +39,31 @@
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        public bool Equals(NcryptorMetadata? other)
+        {
+            if(other is null)
+            {
+                return false;
+            }
+
+            return VerificationTag.SequenceEqual(other.VerificationTag) &&
+                Salt.SequenceEqual(other.Salt) &&
+                IV.SequenceEqual(other.IV);
+        }
+
+        public override bool Equals(object? obj)
+            => Equals(obj as NcryptorMetadata);
+
+        public override int GetHashCode()
+            => VerificationTag.GetHashCode() ^
+                Salt.GetHashCode() ^
+                IV.GetHashCode();
+
+        public static bool operator ==(NcryptorMetadata lhs, NcryptorMetadata rhs)
+            => lhs.Equals(rhs);
+
+        public static bool operator !=(NcryptorMetadata lhs, NcryptorMetadata rhs)
+            => lhs.Equals(rhs);
     }
 }

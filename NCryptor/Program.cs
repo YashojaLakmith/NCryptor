@@ -1,20 +1,11 @@
 ﻿using System.Security.AccessControl;
-using System.Security.Cryptography;
 using System.Security.Principal;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using NCryptor.Crypto;
-using NCryptor.Events;
-using NCryptor.ServiceFactories;
-using NCryptor.TaskModerators;
+using NCryptor.Extensions;
 using NCryptor.Forms;
-using NCryptor.Helpers;
-using NCryptor.Metadata;
-using NCryptor.Options;
-using NCryptor.Streams;
-using NCryptor.Validations;
+using NCryptor.ServiceFactories;
 
 namespace NCryptor
 {
@@ -26,15 +17,12 @@ namespace NCryptor
             // A named mutex will be used to allow only a single instance of the application to run.
 
             using var mutex = CreateAndConfigureMutex();
-            if (!TryAcquireMutex(mutex)) return;
-            try
+            if (!TryAcquireMutex(mutex))
             {
-                SetupAndExecuteMainWindow();
+                return;
             }
-            finally
-            {
-                mutex.ReleaseMutex();
-            }
+
+            TryInitializeApplication(mutex);
         }
 
         private static Mutex CreateAndConfigureMutex()
@@ -86,17 +74,39 @@ namespace NCryptor
             }
         }
 
-        private static void SetupAndExecuteMainWindow()
+        private static void TryInitializeApplication(Mutex namedMutex)
+        {
+            try
+            {
+                BuildServiceFactory();
+                ConfigureApplicationStartup();
+                ExecuteMainWindow();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, @"An error occured.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                namedMutex.ReleaseMutex();
+            }
+        }
+
+        private static void ConfigureApplicationStartup()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+        }
+
+        private static void ExecuteMainWindow()
+        {
             var mainWindow = ResolveMainWindow();
             Application.Run(mainWindow);
         }
 
         private static MainWindow ResolveMainWindow()
         {
-            var serviceFactory = BuildServiceFactory();
+            var serviceFactory = new ServiceFactory();
             return serviceFactory.CreateMainWindow();
         }
 
@@ -105,8 +115,7 @@ namespace NCryptor
             var hostBuilder = CreateHostBuilder();
             ConfigureServices(hostBuilder);
             var host = hostBuilder.Build();
-            var serviceProvider = host.Services;
-            var serviceFactory = new DIBasedServiceFactory(serviceProvider);
+            var serviceFactory = new DIBasedServiceFactory(host.Services);
             ServiceFactory.SetProvider(serviceFactory);
 
             return serviceFactory;
@@ -121,63 +130,29 @@ namespace NCryptor
         {
             hostBuilder.ConfigureServices((context, services) =>
             {
-                services.AddSingleton<ILogEventService, LogEventImpl>();
-                services.AddSingleton<IProgressReportEventService, ProgressReportEventImpl>();
-                services.AddSingleton<IProcessingFileIndexEventService, ProcessingFileIndexEventImpl>();
-                services.AddSingleton<ITaskFinishedEventService, TaskFinishedEventImpl>();
-                services.AddSingleton<IFileServices, FileServicesImpl>();
-                services.AddSingleton<IFileStreamFactory, FileStreamFactoryImpl>();
-                services.AddSingleton<IMetadataHandler, MetadataHandlerImpl>();
-                services.AddSingleton<IInputValidations, InputValidationsImpl>();
-                services.AddSingleton<KeyDerivationOptions>();
-                services.AddSingleton<FileSystemOptions>();
+                services.AddLogEventService();
+                services.AddProgressReporteventService();
+                services.AddProcessingFileIndexEventService();
+                services.AddTaskFinishedEventService();
+                services.AddFileServices();
+                services.AddFileStreamFactory();
+                services.AddMetadataHandler();
+                services.AddInputValidations();
+                services.AddKeyDerivationOptions();
+                services.AddFileSystemOptions();
+                services.AddSymmetricCryptoService();
+                services.AddKeyDerivationServices();
+                services.AddTaskModeratorEventService();
+                services.AddEncryptTaskModerator();
+                services.AddDecryptTaskModerator();
+                services.AddCryptographicOptions();
+                services.AddSymmetricAlgorithm();
 
-                services.AddTransient<ISymmetricCryptoService, SymmetricCryptoServiceImpl>();
-                services.AddTransient<IKeyDerivationServices, KeyDerivationServiceImpl>();
-                services.AddTransient<ITaskModeratorEventService, TaskModeratorEventServiceImpl>();
-                services.AddTransient<MainWindow>();
-                services.AddTransient<EncryptDataCollectionWindow>();
-                services.AddTransient<DecryptDataCollectionWindow>();
-                services.AddTransient<EncryptStatusWindow>();
-                services.AddTransient<DecryptStatusWindow>();
-                services.AddTransient<Func<ManualModeratorParameters, IEncryptTaskModerator>>(
-                    container =>
-                        parameters =>
-                        {
-                            var cryptoService = container.GetRequiredService<ISymmetricCryptoService>();
-                            var metadataHandler = container.GetRequiredService<IMetadataHandler>();
-                            var streamFactory = container.GetRequiredService<IFileStreamFactory>();
-                            var fileServices = container.GetRequiredService<IFileServices>();
-                            var keyServices = container.GetRequiredService<IKeyDerivationServices>();
-                            var eventServices = container.GetRequiredService<ITaskModeratorEventService>();
-
-                            return new EncryptTaskModeratorImpl(cryptoService, metadataHandler, streamFactory, fileServices, keyServices, eventServices, parameters);
-                        });
-                services.AddTransient<Func<ManualModeratorParameters, IDecryptTaskModerator>>(
-                    container =>
-                        parameters =>
-                        {
-                            var cryptoService = container.GetRequiredService<ISymmetricCryptoService>();
-                            var metadataHandler = container.GetRequiredService<IMetadataHandler>();
-                            var streamFactory = container.GetRequiredService<IFileStreamFactory>();
-                            var fileServices = container.GetRequiredService<IFileServices>();
-                            var keyServices = container.GetRequiredService<IKeyDerivationServices>();
-                            var eventServices = container.GetRequiredService<ITaskModeratorEventService>();
-
-                            return new DecryptTaskModeratorImpl(cryptoService, metadataHandler, streamFactory, fileServices, keyServices, eventServices, parameters);
-                        });
-                services.AddTransient<ICryptographicOptions>(
-                    container => container.GetRequiredService<ISymmetricCryptoService>());
-                services.AddTransient<SymmetricAlgorithm>(
-                    container =>            // Inject the symmetric algorithm along with its options
-                    {
-                        var alg = Aes.Create();
-                        alg.KeySize = 256;
-                        alg.Mode = CipherMode.CBC;
-                        alg.Padding = PaddingMode.PKCS7;
-
-                        return alg;
-                    });
+                services.AddMainWindow();
+                services.AddEncryptDataCollectionWindow();
+                services.AddDecryptDataCollectionWindow();
+                services.AddEncryptStatusWindow();
+                services.AddDecryptStatusWindow();
             });
         }
     }
