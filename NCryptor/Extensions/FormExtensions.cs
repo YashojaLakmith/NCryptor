@@ -2,33 +2,32 @@
 
 using NCryptor.Forms;
 
-namespace NCryptor.Extensions
+namespace NCryptor.Extensions;
+
+public static class FormExtensions
 {
-    public static class FormExtensions
+    public static IServiceCollection AddMainWindow(this IServiceCollection services)
     {
-        public static IServiceCollection AddMainWindow(this IServiceCollection services)
-        {
-            return services.AddTransient<MainWindow>();
-        }
+        return services.AddTransient<MainWindow>();
+    }
 
-        public static IServiceCollection AddEncryptDataCollectionWindow(this IServiceCollection services)
-        {
-            return services.AddTransient<EncryptDataCollectionWindow>();
-        }
+    public static IServiceCollection AddEncryptDataCollectionWindow(this IServiceCollection services)
+    {
+        return services.AddTransient<EncryptDataCollectionWindow>();
+    }
 
-        public static IServiceCollection AddDecryptDataCollectionWindow(this IServiceCollection services)
-        {
-            return services.AddTransient<DecryptDataCollectionWindow>();
-        }
+    public static IServiceCollection AddDecryptDataCollectionWindow(this IServiceCollection services)
+    {
+        return services.AddTransient<DecryptDataCollectionWindow>();
+    }
 
-        public static IServiceCollection AddEncryptStatusWindow(this IServiceCollection services)
-        {
-            return services.AddTransient<EncryptStatusWindow>();
-        }
+    public static IServiceCollection AddEncryptStatusWindow(this IServiceCollection services)
+    {
+        return services.AddTransient<EncryptStatusWindow>();
+    }
 
-        public static IServiceCollection AddDecryptStatusWindow(this IServiceCollection services)
-        {
-            return services.AddTransient<DecryptStatusWindow>();
-        }
+    public static IServiceCollection AddDecryptStatusWindow(this IServiceCollection services)
+    {
+        return services.AddTransient<DecryptStatusWindow>();
     }
 }

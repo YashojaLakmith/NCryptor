@@ -1,20 +1,19 @@
 ﻿using NCryptor.Events.EventArguments;
 
-namespace NCryptor.Events
+namespace NCryptor.Events;
+
+public class TaskFinishedEventImpl : ITaskFinishedEventService
 {
-    public class TaskFinishedEventImpl : ITaskFinishedEventService
+    public event EventHandler<TaskFinishedEventArgs>? TaskFinished;
+
+    public void PublishTaskFinished(TaskFinishedDueTo taskFinishedDueTo)
     {
-        public event EventHandler<TaskFinishedEventArgs>? TaskFinished;
+        TaskFinishedEventArgs arg = new(taskFinishedDueTo);
+        RaiseEvent(arg);
+    }
 
-        public void PublishTaskFinished(TaskFinishedDueTo taskFinishedDueTo)
-        {
-            var arg = new TaskFinishedEventArgs(taskFinishedDueTo);
-            RaiseEvent(arg);
-        }
-
-        protected virtual void RaiseEvent(TaskFinishedEventArgs e)
-        {
-            TaskFinished?.Invoke(this, e);
-        }
+    protected virtual void RaiseEvent(TaskFinishedEventArgs e)
+    {
+        TaskFinished?.Invoke(this, e);
     }
 }

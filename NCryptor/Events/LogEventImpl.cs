@@ -1,20 +1,19 @@
 ﻿using NCryptor.Events.EventArguments;
 
-namespace NCryptor.Events
+namespace NCryptor.Events;
+
+public class LogEventImpl : ILogEventService
 {
-    public class LogEventImpl : ILogEventService
+    public event EventHandler<LogEmittedEventArgs>? LogEmitted;
+
+    public void PublishALog(string message)
     {
-        public event EventHandler<LogEmittedEventArgs>? LogEmitted;
+        LogEmittedEventArgs arg = new(message);
+        RaiseEvent(arg);
+    }
 
-        public void PublishALog(string message)
-        {
-            var arg = new LogEmittedEventArgs(message);
-            RaiseEvent(arg);
-        }
-
-        protected virtual void RaiseEvent(LogEmittedEventArgs e)
-        {
-            LogEmitted?.Invoke(this, e);
-        }
+    protected virtual void RaiseEvent(LogEmittedEventArgs e)
+    {
+        LogEmitted?.Invoke(this, e);
     }
 }
