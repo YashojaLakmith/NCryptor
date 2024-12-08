@@ -1,12 +1,11 @@
 ﻿using NCryptor.Events;
 
-namespace NCryptor.Forms
+namespace NCryptor.Forms;
+
+public class EncryptStatusWindow : BaseStatusWindow
 {
-    public class EncryptStatusWindow : BaseStatusWindow
+    public EncryptStatusWindow(IProgressReportEventService progressReportEventService, IProcessingFileIndexEventService processingFileIndexService, ILogEventService logEventService, ITaskFinishedEventService taskFinishedEventService) : base(progressReportEventService, processingFileIndexService, logEventService, taskFinishedEventService)
     {
-        public EncryptStatusWindow(IProgressReportEventService progressReportEventService, IProcessingFileIndexEventService processingFileIndexService, ILogEventService logEventService, ITaskFinishedEventService taskFinishedEventService) : base(progressReportEventService, processingFileIndexService, logEventService, taskFinishedEventService)
-        {
-            Text = @"Encrypting";
-        }
+        Text = @"Encrypting";
     }
 }

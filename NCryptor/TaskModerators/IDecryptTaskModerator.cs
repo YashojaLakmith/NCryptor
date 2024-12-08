@@ -1,13 +1,12 @@
-﻿namespace NCryptor.TaskModerators
+﻿namespace NCryptor.TaskModerators;
+
+/// <summary>
+/// Defines methods for moderating the decryption operation.
+/// </summary>
+public interface IDecryptTaskModerator
 {
     /// <summary>
-    /// Defines methods for moderating the decryption operation.
+    /// Asynchronously moderates file decryption.
     /// </summary>
-    public interface IDecryptTaskModerator
-    {
-        /// <summary>
-        /// Asynchronously moderates file decryption.
-        /// </summary>
-        Task ModerateFileDecryptionAsync();
-    }
+    Task ModerateFileDecryptionAsync();
 }

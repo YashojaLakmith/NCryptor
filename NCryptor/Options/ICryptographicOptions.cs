@@ -1,18 +1,17 @@
-﻿namespace NCryptor.Options
+﻿namespace NCryptor.Options;
+
+/// <summary>
+/// Defines methods for retrieving the options for cryptographic operations.
+/// </summary>
+public interface ICryptographicOptions
 {
     /// <summary>
-    /// Defines methods for retrieving the options for cryptographic operations.
+    /// Key size for the cryptographic algorithm used, in bytes.
     /// </summary>
-    public interface ICryptographicOptions
-    {
-        /// <summary>
-        /// Key size for the cryptographic algorithm used, in bytes.
-        /// </summary>
-        int ByteLengthOfKey { get; }
+    int ByteLengthOfKey { get; }
 
-        /// <summary>
-        /// Initialization Vector size for the cryptographic algorithm used, in bytes.
-        /// </summary>
-        int ByteLengthOfIV { get; }
-    }
+    /// <summary>
+    /// Initialization Vector size for the cryptographic algorithm used, in bytes.
+    /// </summary>
+    int ByteLengthOfIV { get; }
 }
