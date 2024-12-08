@@ -1,6 +1,6 @@
 # NCryptor
 
-NCryptor is a file encryption and decryption tool for Windows built using C# and WinForms which targets .NET 8 It provides an easy-to-use and straightforward graphical interface for encrypting and decrypting personal files using symmetric encryption algorithms.
+NCryptor is a file encryption and decryption tool for Windows built using C# and WinForms which targets .NET 8 and .NET 9 It provides an easy-to-use and straightforward graphical interface for encrypting and decrypting personal files using symmetric encryption algorithms.
 
 ### Table of Contents
 - [Features](#features)
@@ -41,11 +41,11 @@ NCryptor is a file encryption and decryption tool for Windows built using C# and
 
 <a name="build-dependencies"></a>
 ### Build Dependencies
-- The application requires .NET 8 SDK to be present on the platform for build process.
+- The application requires .NET 8 or .NET 9 SDK to be present on the platform for build process.
 
 <a name="runtime-dependencies"></a>
 ### Runtime Dependencies
-- The application requires .NET 8 Runtime to be present on the platform if it was built as a framework dependent application.
+- The application requires .NET 8 or .NET 9 Runtime to be present on the platform if it was built as a framework dependent application.
 
 <a name="backwards-compatibility"></a>
 ### Backwards Compatibility
